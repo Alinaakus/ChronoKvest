@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ХроноКвест — тренажёр дат по истории</title>
+  <!-- Шрифт Inter (Google Fonts) — чистая «эппловская» типографика -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="app">
+
+    <!-- Путь по эпохам (визуальный прогресс). Глобальный; на посадочном
+         экране скрывается из JS. -->
+    <div class="path" id="path"></div>
+
+    <!-- ЭКРАН 0: Посадочный (hero) — эмоциональное знакомство с продуктом.
+         Только: кот сверху, «машина времени» → «ХроноКвест», слоган и одна кнопка. -->
+    <section class="screen hero-screen" id="screen-hero">
+      <div class="hero hero--big">
+        <div class="hero-mascot" id="hero-mascot"></div>
+        <div class="hero-display">
+          <div class="hero-year" id="hero-year">862</div>
+          <div class="hero-title" id="hero-title" aria-label="ХроноКвест"></div>
+        </div>
+      </div>
+      <div class="hero-copy">
+        <p class="hero-slogan">Запоминай даты играючи</p>
+        <p class="hero-subline">1 дата = 1 яркая ассоциация.</p>
+        <p class="hero-subline">90 ключевых дат ЕГЭ без зубрёжки.</p>
+      </div>
+      <button class="btn btn-primary btn-cta" onclick="goMenu()">Начать путешествие во времени</button>
+    </section>
+
+    <!-- ЭКРАН 1: Меню (хаб) — функциональный выбор действия. -->
+    <section class="screen hidden" id="screen-menu">
+      <h1 class="menu-title">ХроноКвест</h1>
+
+      <!-- Приборная панель: 3 плитки статистики (заполняются из app.js) -->
+      <div class="menu-tiles">
+        <div class="mtile">
+          <div class="mtile-num" id="tile-streak">0</div>
+          <div class="mtile-cap">
+            <svg class="cap-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg>
+            <span>дней подряд</span>
+          </div>
+        </div>
+        <div class="mtile">
+          <div class="mtile-num"><span id="tile-learned">0</span><span class="mtile-sep">/</span><span id="tile-total">0</span></div>
+          <div class="mtile-cap">
+            <svg class="cap-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>
+            <span>дат выучено</span>
+          </div>
+        </div>
+        <div class="mtile">
+          <div class="mtile-num" id="tile-hard">0</div>
+          <div class="mtile-cap">
+            <svg class="cap-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
+            <span>сложных дат</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Карточки режимов: иконка + название + короткое описание -->
+      <div class="mode-grid">
+        <button class="mode-card mode-card--primary" onclick="startLearn()">
+          <div class="mode-ico">
+            <!-- книга -->
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M12 6.5C10.5 5.3 8.5 4.8 4 4.8v13c4.5 0 6.5.5 8 1.7 1.5-1.2 3.5-1.7 8-1.7v-13c-4.5 0-6.5.5-8 1.7Z"/>
+              <path d="M12 6.5v13"/>
+            </svg>
+          </div>
+          <div class="mode-name">Обучение</div>
+          <div class="mode-desc">Читай дату и её ассоциацию — запоминай без зубрёжки</div>
+        </button>
+        <button class="mode-card" onclick="startQuiz()">
+          <div class="mode-ico">
+            <!-- мишень -->
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <circle cx="12" cy="12" r="8.5"/>
+              <circle cx="12" cy="12" r="4.5"/>
+              <circle cx="12" cy="12" r="0.6" fill="currentColor"/>
+            </svg>
+          </div>
+          <div class="mode-name">Квиз</div>
+          <div class="mode-desc">Проверь себя: выбери верный год из четырёх</div>
+        </button>
+        <button class="mode-card" onclick="showProgress()">
+          <div class="mode-ico">
+            <!-- график -->
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M4 4v16h16"/>
+              <path d="M7.5 14.5 11 11l2.5 2.5L19 8"/>
+            </svg>
+          </div>
+          <div class="mode-name">Мой прогресс</div>
+          <div class="mode-desc">Карта дат, серии и сложные даты в одном месте</div>
+        </button>
+      </div>
+
+      <p class="hint">ХроноКвест построен на методике интервального повторения — самом проверенном способе запоминания. Всего 10 минут в день превращают одну из самых пугающих тем ЕГЭ по истории в лёгкую привычку.</p>
+    </section>
+
+    <!-- ЭКРАН 2: Обучение -->
+    <section class="screen hidden" id="screen-learn">
+      <!-- В обучении маскота нет: позже здесь появятся авторские персонажи под каждую дату -->
+      <div class="card">
+        <!-- Авторская иллюстрация-обложка (если у даты есть картинка) -->
+        <div class="card-illustration" id="learn-illustration"></div>
+        <div class="card-date" id="learn-date">—</div>
+        <div class="card-event" id="learn-event">—</div>
+        <!-- Другие формулировки этого же события (варианты условия на ЕГЭ) -->
+        <div class="card-event-alts" id="learn-event-alts"></div>
+
+        <!-- Блоки в две колонки на широком экране (обёртка .learn-blocks) -->
+        <div class="learn-blocks">
+          <!-- Контекст: что за событие и почему важно -->
+          <div class="block block-context">
+            <div class="block-title">Контекст</div>
+            <div id="learn-context">—</div>
+          </div>
+
+          <!-- Лайфхак: приём для запоминания даты -->
+          <div class="block block-lifehack">
+            <div class="block-title">Лайфхак</div>
+            <div id="learn-lifehack">—</div>
+          </div>
+        </div>
+      </div>
+      <div class="controls">
+        <button class="btn btn-ghost" onclick="goMenu()">← Меню</button>
+        <button class="btn btn-primary" id="learn-next" onclick="learnNext()">Далее →</button>
+      </div>
+    </section>
+
+    <!-- ЭКРАН 3: Квиз -->
+    <section class="screen hidden" id="screen-quiz">
+      <div class="card">
+        <!-- Пиксельный кот-маскот: реагирует на ответ (радуется / задумывается) -->
+        <div class="quiz-mascot" id="quiz-mascot"></div>
+        <div class="card-label">Когда это произошло?</div>
+        <div class="card-event" id="quiz-event">—</div>
+        <div class="options" id="quiz-options"></div>
+        <!-- Область реакции: приятная при верном, мягкая подсказка при ошибке -->
+        <div class="feedback hidden" id="quiz-feedback"></div>
+      </div>
+      <div class="controls">
+        <button class="btn btn-ghost" onclick="goMenu()">← Меню</button>
+      </div>
+    </section>
+
+    <!-- ЭКРАН 4: Сессия завершена -->
+    <section class="screen hidden" id="screen-done">
+      <div class="card card-done">
+        <div class="card-character">🎉</div>
+        <h2 id="done-title">Готово!</h2>
+        <p id="done-text">Маленькая победа засчитана.</p>
+      </div>
+      <div class="controls">
+        <button class="btn btn-primary" onclick="goMenu()">В меню</button>
+      </div>
+    </section>
+
+    <!-- ЭКРАН 5: Мой прогресс -->
+    <section class="screen hidden" id="screen-progress">
+      <h1>Мой прогресс</h1>
+
+      <!-- Общий прогресс + серия + число сложных дат -->
+      <div class="card stats-card">
+        <div class="stat-big"><span id="prog-learned">0</span> / <span id="prog-total">0</span></div>
+        <div class="card-label">дат выучено</div>
+        <div class="progress-bar"><div class="progress-fill" id="prog-fill"></div></div>
+        <div class="stat-row">
+          <div class="stat"><div class="stat-num" id="prog-streak">0</div><div class="stat-cap"><svg class="cap-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg><span>дней подряд</span></div></div>
+          <div class="stat"><div class="stat-num" id="prog-hard">0</div><div class="stat-cap"><svg class="cap-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg><span>сложных дат</span></div></div>
+        </div>
+      </div>
+
+      <!-- Список дат с фильтрами. Каждая дата кликабельна → обучение по ней. -->
+      <div class="card list-card">
+        <div class="filter-row">
+          <button class="chip active" data-filter="all" onclick="setFilter('all')">Все</button>
+          <button class="chip" data-filter="mastered" onclick="setFilter('mastered')">Выучено</button>
+          <button class="chip" data-filter="hard" onclick="setFilter('hard')">Сложные</button>
+        </div>
+        <div class="filter-hint" id="filter-hint"></div>
+        <div id="stats-list"></div>
+      </div>
+
+      <div class="controls">
+        <button class="btn btn-ghost" onclick="goMenu()">← Меню</button>
+        <button class="btn btn-danger" onclick="askReset()">Сбросить прогресс</button>
+      </div>
+    </section>
+
+    <!-- Модалка подтверждения сброса -->
+    <div class="modal-overlay hidden" id="reset-modal">
+      <div class="modal">
+        <div class="modal-title">Сбросить весь прогресс?</div>
+        <div class="modal-text">Удалятся статистика по датам, серия дней и список сложных дат. Отменить это действие будет нельзя.</div>
+        <div class="modal-actions">
+          <button class="btn btn-ghost" onclick="closeReset()">Отмена</button>
+          <button class="btn btn-danger" onclick="confirmReset()">Да, сбросить</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Сначала данные, потом логика -->
+  <script src="data.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
