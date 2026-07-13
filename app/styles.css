@@ -19,6 +19,15 @@
   --radius: 20px;
   --shadow: 0 1px 3px rgba(0, 0, 0, .05);      /* еле заметная тень */
   --shadow-sm: 0 1px 3px rgba(0, 0, 0, .05);
+
+  /* Приглушённые пастельные акценты по разделам (мягкие, единой насыщенности —
+     чтобы добавить цвет, но не сделать интерфейс пёстрым). Каждому разделу свой. */
+  --c-learn:  #6E93D6;  /* Обучение — синий */
+  --c-quiz:   #3FA08B;  /* Квиз — бирюзово-зелёный */
+  --c-cards:  #CE9148;  /* Режим карточек — тёплый янтарный */
+  --c-prog:   #8E7CC6;  /* Мой прогресс — мягкий фиолетовый */
+
+  --brand:    #4E74C8;  /* фирменный синий — акцентная часть логотипа («Квест») */
 }
 
 * { box-sizing: border-box; }
@@ -40,7 +49,7 @@ body {
   padding: 22px 20px 72px;
 }
 /* Экраны чтения/прогресса не должны растягиваться на всю ширину рамки */
-#screen-learn .card, #screen-learn .controls,
+#screen-learn .card, #screen-learn .controls, #screen-learn .learn-tools,
 #screen-progress > *:not(h1) { max-width: 760px; margin-left: auto; margin-right: auto; }
 #screen-progress h1 { max-width: 760px; margin-left: auto; margin-right: auto; }
 
@@ -48,13 +57,33 @@ body {
    тяжело читать, а квиз в пустой ширине выглядит «растянутым». Ограничиваем
    их карточки и панель кнопок и центрируем — при этом рамка приложения широкая. */
 #screen-quiz .card, #screen-done .card,
-#screen-quiz .controls, #screen-done .controls {
+#screen-quiz .controls, #screen-done .controls,
+#screen-flip .controls {
   max-width: 620px; margin-left: auto; margin-right: auto;
 }
 
 /* --- Шапка меню (второй экран) --- */
 #screen-menu { padding-top: 80px; }
-.menu-title { font-size: 44px; font-weight: 600; letter-spacing: -0.03em; margin: 0 0 64px; color: var(--ink); }
+
+/* ============ БРЕНД: логотип-вордмарк + маскот ============ */
+/* Логотип набран ОТДЕЛЬНЫМ шрифтом (Space Grotesk), чтобы считываться как
+   товарный знак, а не как обычный заголовок на интерфейсном Inter.
+   Двухцветность: «Хроно» — основной цвет, «Квест» — фирменный синий. */
+.logo {
+  font-family: "Space Grotesk", "Inter", -apple-system, sans-serif;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+}
+/* Логотип одним цветом (основной тёмный). Классы lg-chrono/lg-quest оставлены
+   на будущее — цвет обеих частей сейчас одинаковый. */
+.lg-chrono { color: var(--ink); }
+.lg-quest  { color: var(--ink); }
+
+/* Брендовый лок-ап на экране меню: статичный маскот над логотипом */
+.brand { display: flex; flex-direction: column; align-items: center; gap: 12px; margin: 0 0 56px; }
+.brand-mascot { line-height: 0; }
+.brand-mascot .cat-svg { filter: drop-shadow(0 4px 0 rgba(0, 0, 0, .07)); }
+.menu-title { font-size: 46px; margin: 0; }
 .menu-stats {
   display: flex; flex-wrap: wrap; align-items: center; justify-content: center;
   gap: 10px 14px; margin-bottom: 26px;
@@ -99,31 +128,61 @@ h1 { font-size: 34px; font-weight: 700; letter-spacing: -0.03em; margin: 20px 0 
 /* --- Меню: старая колонка кнопок (оставлена, если понадобится) --- */
 .menu { display: flex; flex-direction: column; gap: 12px; max-width: 340px; margin: 0 auto; }
 
-/* --- Меню: приборная панель из 3 плиток статистики --- */
-/* Единая сетка 3 колонки, gap 24px — общая для стат-карточек и карточек режимов */
+/* --- Меню: строка метрик статистики (НЕ кнопки) --- */
+/* Намеренно ПЛОСКАЯ строка: без фона, рамок, тени и pointer, с тонкими вертикальными
+   разделителями — читается как сводка данных, а не как кликабельные карточки.
+   «Приподнятость» (тень + hover) остаётся визуальным признаком ТОЛЬКО карточек режимов. */
 .menu-tiles {
-  display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px;
-  margin: 0 0 24px;
+  display: flex; align-items: stretch; justify-content: center;
+  margin: 0 0 30px;
 }
 .mtile {
-  background: var(--surface); border: 1px solid var(--line); box-shadow: var(--shadow-sm);
-  border-radius: 20px; padding: 24px; text-align: left;
+  flex: 1; min-width: 0; cursor: default;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 7px;
+  padding: 2px 14px; text-align: center;
+  background: none; border: none; box-shadow: none; border-radius: 0;
 }
+/* Тонкий разделитель между метриками (вместо отдельных карточек с рамкой) */
+.mtile + .mtile { border-left: 1px solid var(--line); }
+/* Цифра — главный акцент: крупная и жирная, доминирует над подписью.
+   Цвет остаётся нейтральным (акцент только размером/начертанием). */
 .mtile-num {
-  font-size: 32px; font-weight: 700; letter-spacing: -0.02em; color: var(--ink);
+  font-size: 42px; font-weight: 800; letter-spacing: -0.03em; color: var(--ink);
   line-height: 1; font-variant-numeric: tabular-nums;
 }
 .mtile-sep { color: var(--muted); font-weight: 600; margin: 0 1px; }
-.mtile-cap { font-size: 14px; color: var(--muted); margin-top: 8px; font-weight: 500;
-  display: inline-flex; align-items: center; gap: 6px; }
-/* Маленькая линейная иконка слева от подписи статистики (цвет наследуется — #6B6B66) */
-.cap-ico { width: 16px; height: 16px; flex: none; }
+.mtile-cap {
+  font-size: 13px; color: var(--muted); font-weight: 500; line-height: 1.3;
+  text-align: center;
+}
+/* Маленькая линейная иконка рядом с подписью (цвет наследуется — приглушённый) */
+.cap-ico { width: 15px; height: 15px; flex: none; }
+/* Статистика намеренно нейтральная (чёрно-бело-серая): цвет в интерфейсе
+   работает только на разделение режимов, статистика не спорит с ним взглядом. */
 
 /* --- Меню: карточки режимов (иконка + название + описание) --- */
+/* Три обучающих режима — в ряд (тот же ритм, что у 3 плиток статистики выше) */
 .mode-grid {
   display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px;
   align-items: stretch; margin: 0;
 }
+
+/* «Мой прогресс» — отдельная широкая строка под режимами (раздел статистики,
+   визуально отделён от обучающих режимов). Горизонтальная компоновка. */
+.progress-nav {
+  display: flex; align-items: center; gap: 18px; width: 100%;
+  margin-top: 24px; padding: 20px 24px;
+  background: var(--surface); border: 1px solid var(--line); box-shadow: var(--shadow-sm);
+  border-radius: 20px; cursor: pointer; font-family: inherit; color: var(--ink); text-align: left;
+  transition: transform .15s cubic-bezier(.2,.8,.2,1), box-shadow .2s, border-color .2s;
+}
+.progress-nav:hover { transform: translateY(-3px); box-shadow: 0 6px 18px rgba(0,0,0,.08); border-color: var(--accent-deep); }
+.progress-nav:active { transform: translateY(0) scale(.99); }
+.progress-nav:focus-visible { outline: 3px solid rgba(29,29,27,.28); outline-offset: 2px; }
+.progress-nav .mode-ico { margin-bottom: 0; }
+.progress-nav-text { flex: 1; min-width: 0; }
+.progress-nav .mode-name { margin-bottom: 4px; }
+.progress-nav-chevron { color: var(--muted); font-size: 26px; line-height: 1; flex: none; }
 .mode-card {
   display: flex; flex-direction: column; align-items: stretch; text-align: left; gap: 0;
   padding: 32px;
@@ -147,6 +206,38 @@ h1 { font-size: 34px; font-weight: 700; letter-spacing: -0.03em; margin: 20px 0 
 /* Основной режим (обучение) — акцентная светло-голубая подложка */
 .mode-card--primary { background: var(--accent); border-color: transparent; }
 .mode-card--primary:hover { border-color: var(--accent-deep); }
+
+/* Цветной чип-иконка на каждый раздел (связь «цвет ↔ раздел»).
+   Заливка — приглушённый акцент, иконка внутри остаётся белой. */
+.mode-card--learn .mode-ico { background: var(--c-learn); }
+.mode-card--quiz  .mode-ico { background: var(--c-quiz); }
+.mode-card--cards .mode-ico { background: var(--c-cards); }
+.progress-nav     .mode-ico { background: var(--c-prog); }
+
+/* --- Анонс будущей платной версии (не кнопка, а приглушённая плашка) --- */
+/* Пунктирная рамка + приглушённый цвет отличают её от рабочих карточек режимов. */
+.soon-card {
+  display: flex; align-items: center; gap: 16px; width: 100%;
+  margin-top: 16px; padding: 18px 22px;
+  background: transparent;
+  border: 1.5px dashed var(--line); border-radius: 20px;
+  text-align: left; color: var(--muted);
+}
+.soon-ico {
+  width: 40px; height: 40px; border-radius: 50%; flex: none;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(78, 116, 200, .10); color: var(--brand);
+}
+.soon-ico svg { width: 20px; height: 20px; }
+.soon-text { flex: 1; min-width: 0; }
+.soon-head { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.soon-head b { color: var(--ink); font-size: 16px; font-weight: 600; letter-spacing: -0.01em; }
+.soon-badge {
+  font-size: 11px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase;
+  color: var(--brand); background: rgba(78, 116, 200, .12);
+  padding: 3px 9px; border-radius: 999px;
+}
+.soon-desc { font-size: 13.5px; color: var(--muted); line-height: 1.45; margin-top: 4px; }
 
 /* --- Кнопки --- */
 .btn {
@@ -196,7 +287,7 @@ h1 { font-size: 34px; font-weight: 700; letter-spacing: -0.03em; margin: 20px 0 
 .card-date { font-size: 44px; font-weight: 700; letter-spacing: -0.03em; color: var(--ink); line-height: 1; }
 .card-event { font-size: 20px; font-weight: 600; letter-spacing: -0.02em; }
 /* Другие формулировки события — мелко и приглушённо, пустой блок не мешает */
-.card-event-alts { font-size: 13px; color: var(--muted); line-height: 1.45; max-width: 40ch; }
+.card-event-alts { font-size: 13px; color: var(--muted); line-height: 1.45; max-width: 44ch; text-align: center; margin: 6px auto 0; }
 .card-event-alts:empty { display: none; }
 .card-label { color: var(--muted); font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: .08em; }
 
@@ -231,6 +322,68 @@ h1 { font-size: 34px; font-weight: 700; letter-spacing: -0.03em; margin: 20px 0 
 .card-done h2 { margin: 6px 0; font-size: 26px; font-weight: 700; letter-spacing: -0.02em; }
 .card-done .card-character { font-size: 56px; line-height: 1; }
 
+/* ===================================================================== */
+/* =========  «ТИПОГРАФСКИЙ ПЛАКАТ» (оформление карточки обучения)  ===== */
+/* ===================================================================== */
+/* Светлая адаптация: тёмные цифры на белой карточке, акцентная пара —
+   фирменный --brand, тонкий светло-серый таймлайн, максимум воздуха. */
+.typo { width: 100%; display: flex; flex-direction: column; gap: 24px; padding: 6px 2px 2px; }
+
+/* Метаданные сверху: эпоха слева, номер даты справа */
+.typo-meta {
+  display: flex; justify-content: space-between; gap: 12px;
+  font-size: 12px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase;
+  color: var(--muted); font-variant-numeric: tabular-nums;
+}
+
+/* Крупный год — главный элемент. Шрифт логотипа (Space Grotesk) для «плакатности». */
+.typo-hero { display: flex; flex-direction: column; align-items: center; gap: 8px; margin: 18px 0 8px; }
+/* Группы цифр разделяем ЦВЕТОМ + лёгким интервалом (0.14em). Никаких двоеточий/циферблата —
+   это группировка для восприятия, а не время суток. */
+.typo-num {
+  display: inline-flex; gap: .14em; align-items: baseline; flex-wrap: wrap; justify-content: center;
+  font-family: "Space Grotesk", "Inter", sans-serif;
+  font-weight: 700; letter-spacing: -0.01em; line-height: .9;
+  color: var(--ink); font-variant-numeric: tabular-nums;
+}
+/* Размер под длину строки года */
+.typo-num.sz-l { font-size: clamp(58px, 13vw, 104px); }  /* «988», «1812» */
+.typo-num.sz-m { font-size: clamp(40px, 9vw, 72px); }    /* «964–966», «VI–VIII», «1650-е» */
+.typo-num.sz-s { font-size: clamp(28px, 6.4vw, 46px); }  /* «1725–1762 (1801)» */
+.typo-accent { color: var(--brand); }         /* акцентная группа — фирменный синий */
+.typo-suffix {
+  font-size: 14px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase;
+  color: var(--muted);
+}
+
+/* Таймлайн: тонкая линия + точка-маркер положения даты в истории */
+.typo-timeline { width: 100%; max-width: 440px; margin: 6px auto 0;
+  display: flex; flex-direction: column; gap: 7px; }
+.typo-rail { position: relative; height: 2px; background: var(--line); border-radius: 2px; }
+.typo-pin {
+  position: absolute; top: 50%; width: 12px; height: 12px; border-radius: 50%;
+  background: var(--brand); transform: translate(-50%, -50%); z-index: 1;
+  /* Мягкая пульсация — точка «живая», акцентная метка положения даты. */
+  animation: pinPulse 2s ease-in-out infinite;
+}
+/* Внутренняя тень-обводка постоянная + внешнее кольцо, которое плавно
+   расходится и гаснет (пульс) в акцентном цвете. */
+@keyframes pinPulse {
+  0%   { box-shadow: 0 0 0 4px rgba(78, 116, 200, .18), 0 0 0 2px rgba(78, 116, 200, .30); }
+  70%  { box-shadow: 0 0 0 4px rgba(78, 116, 200, .18), 0 0 0 10px rgba(78, 116, 200, 0); }
+  100% { box-shadow: 0 0 0 4px rgba(78, 116, 200, .18), 0 0 0 2px rgba(78, 116, 200, 0); }
+}
+.typo-ends {
+  display: flex; justify-content: space-between;
+  font-size: 11px; color: var(--muted); font-variant-numeric: tabular-nums;
+}
+
+/* Подпись события под таймлайном */
+.typo-event {
+  font-size: 18px; font-weight: 600; letter-spacing: -0.01em; color: var(--ink);
+  text-align: center; text-wrap: balance; max-width: 34ch; margin: 0 auto;
+}
+
 /* --- Варианты ответа в квизе --- */
 .options { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 8px; width: 100%; }
 .option {
@@ -264,6 +417,49 @@ h1 { font-size: 34px; font-weight: 700; letter-spacing: -0.03em; margin: 20px 0 
 .controls { display: flex; justify-content: space-between; gap: 10px; }
 .pop { animation: pop .4s cubic-bezier(.2,.8,.2,1); }
 @keyframes pop { 0% {transform: scale(.85); opacity:.5;} 60% {transform: scale(1.06);} 100% {transform: scale(1);} }
+
+/* ===================================================================== */
+/* ============  РЕЖИМ «ВСПОМНИ И ПЕРЕВЕРНИ» (тренировочный)  =========== */
+/* ===================================================================== */
+/* Плашка-подсказка при входе: этот режим не пишется в прогресс */
+.train-note {
+  display: flex; align-items: center; gap: 10px;
+  max-width: 620px; margin: 0 auto 20px;
+  background: var(--accent); color: var(--ink);
+  border-radius: 14px; padding: 12px 16px;
+  font-size: 14px; line-height: 1.45; text-align: left; font-weight: 500;
+}
+.train-note svg { width: 18px; height: 18px; flex: none; }
+
+/* Сцена (перспектива) + сама переворачивающаяся карточка (3D flip) */
+.flip-scene { max-width: 620px; margin: 0 auto 22px; perspective: 1400px; }
+.flip-card {
+  position: relative; width: 100%; min-height: 300px;
+  border: none; padding: 0; background: transparent; cursor: pointer;
+  font-family: inherit;
+  transform-style: preserve-3d;
+  transition: transform .6s cubic-bezier(.2,.8,.2,1);
+}
+.flip-card.flipped { transform: rotateY(180deg); }        /* перевёрнута — виден оборот */
+.flip-card:hover { transform: translateY(-2px); }
+.flip-card.flipped:hover { transform: rotateY(180deg) translateY(-2px); }
+.flip-card:focus-visible { outline: 3px solid rgba(29,29,27,.28); outline-offset: 4px; border-radius: var(--radius); }
+
+/* Две стороны лежат друг на друге; изнанка скрыта, пока сторона отвёрнута */
+.flip-face {
+  position: absolute; inset: 0;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px;
+  padding: 34px 28px;
+  background: var(--surface); border: 1px solid var(--line);
+  border-radius: var(--radius); box-shadow: var(--shadow);
+  backface-visibility: hidden; -webkit-backface-visibility: hidden;
+}
+/* Оборот заранее развёрнут на 180°; при перевороте он оказывается лицом к нам.
+   Зелёная подложка — как «раскрытие правильного ответа». */
+.flip-back { transform: rotateY(180deg); background: var(--good-tint); border-color: var(--good); }
+.flip-back .card-label { color: var(--good); }
+.flip-back .card-date { color: var(--good); }
+.flip-hint { font-size: 13px; color: var(--muted); font-weight: 500; }
 
 /* ===================================================================== */
 /* =================  HERO «МАШИНА ВРЕМЕНИ» (главная)  ================== */
@@ -323,7 +519,7 @@ h1 { font-size: 34px; font-weight: 700; letter-spacing: -0.03em; margin: 20px 0 
 /* уход цифр при морфинге в название */
 .hero-year.out { opacity: 0; transform: translateY(-40%) scale(.92); }
 
-.hero-title { font-size: 40px; }
+.hero-title { font-size: 40px; font-family: "Space Grotesk", "Inter", sans-serif; }
 .hero-title span {
   display: inline-block; opacity: 0; transform: translateY(16px);
   transition: opacity .5s cubic-bezier(.2,.8,.2,1), transform .5s cubic-bezier(.2,.8,.2,1);
@@ -378,28 +574,38 @@ h1 { font-size: 34px; font-weight: 700; letter-spacing: -0.03em; margin: 20px 0 
   image-rendering: pixelated;
   filter: drop-shadow(0 5px 0 rgba(0, 0, 0, .08));
 }
-.mascot--idle  .cat-stage { animation: idle 3.2s ease-in-out infinite; }
-.mascot--happy .cat-stage { animation: dance .95s ease-in-out infinite; }
-.mascot--think .cat-stage { animation: ponder 2.5s ease-in-out infinite; }
-@keyframes idle { 0%,100% { transform: translateY(0) rotate(0); } 50% { transform: translateY(-4%) rotate(0); } }
-@keyframes dance {
-  0%,100% { transform: translateY(0) rotate(-5deg); }
-  25% { transform: translateY(-12%) rotate(5deg); }
-  50% { transform: translateY(0) rotate(-3deg); }
-  75% { transform: translateY(-7%) rotate(4deg); }
+.mascot--idle  .cat-stage { animation: idleBreathe 3.8s ease-in-out infinite; }
+.mascot--happy .cat-stage { animation: dance .9s ease-in-out infinite; }
+.mascot--think .cat-stage { animation: ponder 2.3s ease-in-out infinite; }
+/* Покой — очень мягкое «дыхание»: едва заметный подъём + масштаб, чтобы кот
+   выглядел живым, а не застывшим (моргание добавляется на JS). */
+@keyframes idleBreathe {
+  0%,100% { transform: translateY(0) scale(1); }
+  50%     { transform: translateY(-5%) scale(1.015); }
 }
-@keyframes ponder { 0%,100% { transform: rotate(-7deg); } 50% { transform: rotate(7deg); } }
+/* Радость — бодрое подпрыгивание с покачиванием головы (наклон меняет знак). */
+@keyframes dance {
+  0%   { transform: translateY(0) rotate(-6deg); }
+  20%  { transform: translateY(-17%) rotate(6deg); }
+  40%  { transform: translateY(0) rotate(-4deg); }
+  60%  { transform: translateY(-9%) rotate(5deg); }
+  80%  { transform: translateY(-2%) rotate(-3deg); }
+  100% { transform: translateY(0) rotate(-6deg); }
+}
+/* Задумчивость/ошибка — покачивание из стороны в сторону (сдвиг + наклон). */
+@keyframes ponder {
+  0%,100% { transform: translateX(-7%) rotate(-8deg); }
+  50%     { transform: translateX(7%) rotate(8deg); }
+}
+/* Меню-маскот: спокойное «дыхание» на стабильной обёртке (моргание — на JS). */
+#menu-mascot { display: inline-block; transform-origin: bottom center; animation: idleBreathe 4.4s ease-in-out infinite; }
 
+/* Радость выражается ТОЛЬКО мордочкой (закрытые глаза «^ ^» + улыбка) — никаких
+   плавающих искр/звёздочек у головы. Осталась только подсказка «?» для задумчивости. */
 .fx { position: absolute; inset: 0; pointer-events: none; }
 .fx span { position: absolute; }
-.fx--happy { display: none; color: #F5B93B; font-size: 18px; }
 .fx--think { display: none; color: var(--muted); font-weight: 700; font-size: 24px; right: -8px; top: -16px; }
-.mascot--happy .fx--happy { display: block; }
 .mascot--think .fx--think { display: block; animation: bob 2.2s ease-in-out infinite; }
-.fx--happy .s1 { left: -12px; top: 4px;  animation: spark 1.1s ease-in-out infinite; }
-.fx--happy .s2 { right: -10px; top: 12px; font-size: 13px; animation: spark 1.1s ease-in-out .35s infinite; }
-.fx--happy .s3 { left: 50%; top: -18px; animation: spark 1.1s ease-in-out .6s infinite; }
-@keyframes spark { 0%,100% { opacity: 0; transform: translateY(5px) scale(.7); } 50% { opacity: 1; transform: translateY(-5px) scale(1); } }
 @keyframes bob { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
 
 /* ===================================================================== */
@@ -418,10 +624,11 @@ h1 { font-size: 34px; font-weight: 700; letter-spacing: -0.03em; margin: 20px 0 
 .progress-fill { height: 100%; background: var(--good); border-radius: 999px; width: 0;
   transition: width .5s cubic-bezier(.2,.8,.2,1); }
 .stat-row { display: flex; gap: 12px; width: 100%; margin-top: 12px; }
-.stat { flex: 1; background: var(--tint); border-radius: 14px; padding: 14px 10px; }
-.stat-num { font-size: 26px; font-weight: 800; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
-.stat-cap { font-size: 12px; color: var(--muted); margin-top: 2px; font-weight: 500;
-  display: inline-flex; align-items: center; gap: 5px; }
+.stat { flex: 1; background: var(--tint); border-radius: 14px; padding: 16px 10px;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; text-align: center; }
+/* Цифра доминирует размером/начертанием (нейтральный цвет); подпись — тихая. */
+.stat-num { font-size: 32px; font-weight: 800; letter-spacing: -0.03em; line-height: 1; color: var(--ink); font-variant-numeric: tabular-nums; }
+.stat-cap { font-size: 12px; color: var(--muted); font-weight: 500; text-align: center; }
 .stat-cap .cap-ico { width: 14px; height: 14px; }
 
 /* Списки дат */
@@ -437,9 +644,30 @@ h1 { font-size: 34px; font-weight: 700; letter-spacing: -0.03em; margin: 20px 0 
   transition: background .2s, color .2s, border-color .2s;
 }
 .chip:hover { border-color: var(--ink); color: var(--ink); }
+/* «Все» — общий, не оценочный статус: нейтральный (тёмная заливка в активном). */
 .chip.active { background: var(--ink); color: #fff; border-color: var(--ink); }
 .chip:focus-visible { outline: 3px solid rgba(29,29,27,.28); outline-offset: 2px; }
+
+/* Теги окрашены по смыслу и угадываются по цвету ещё до нажатия: в покое —
+   цветной текст + бледная обводка того же цвета, в активном — сплошная заливка. */
+.chip[data-filter="mastered"] { color: var(--good); border-color: rgba(40, 162, 91, .40); }
+.chip[data-filter="mastered"]:hover { border-color: var(--good); color: var(--good); }
+.chip[data-filter="mastered"].active { background: var(--good); color: #fff; border-color: var(--good); }
+
+.chip[data-filter="hard"] { color: var(--soft); border-color: rgba(194, 91, 68, .40); }
+.chip[data-filter="hard"]:hover { border-color: var(--soft); color: var(--soft); }
+.chip[data-filter="hard"].active { background: var(--soft); color: #fff; border-color: var(--soft); }
 .filter-hint { font-size: 12.5px; color: var(--muted); text-align: left; line-height: 1.45; margin-bottom: 10px; }
+
+/* Быстрый вход «Тренировать эти даты» под тегом «Сложные» */
+.hard-train {
+  display: flex; align-items: center; flex-wrap: wrap; gap: 10px;
+  padding: 12px 14px; margin-bottom: 12px;
+  background: var(--soft-tint); border-radius: 14px;
+}
+.hard-train-label { font-size: 13.5px; font-weight: 600; color: var(--soft); }
+.hard-train-btns { display: flex; gap: 8px; margin-left: auto; flex-wrap: wrap; }
+.btn-sm { padding: 9px 16px; font-size: 14px; }
 
 /* Кликабельная строка даты (кнопка) */
 .stat-item {
@@ -478,20 +706,350 @@ h1 { font-size: 34px; font-weight: 700; letter-spacing: -0.03em; margin: 20px 0 
 .modal-actions { display: flex; gap: 10px; }
 .modal-actions .btn { flex: 1; }
 
+/* --- Футер: контакт для обратной связи --- */
+/* Ненавязчивая строка внизу страницы, видна на всех экранах. */
+.app-footer {
+  margin-top: 56px; padding-top: 22px;
+  border-top: 1px solid var(--line);
+  text-align: center; font-size: 13px; line-height: 1.5; color: var(--muted);
+}
+.app-footer a {
+  color: var(--muted); text-decoration: underline;
+  text-underline-offset: 2px; text-decoration-color: var(--line);
+  transition: color .15s, text-decoration-color .15s;
+}
+.app-footer a:hover { color: var(--ink); text-decoration-color: var(--muted); }
+.app-footer a:focus-visible { outline: 3px solid rgba(29,29,27,.28); outline-offset: 2px; border-radius: 3px; }
+
+/* ===================================================================== */
+/* ============  СТРАНИЦА «КАК УЧИТЬ ДАТЫ БЕЗ СТРЕССА»  ================= */
+/* ===================================================================== */
+/* Просветительская статья: читаемая колонка, воздух, левое выравнивание.
+   Персонажа здесь намеренно нет — отдельный этап позже. */
+#screen-guide { text-align: left; }
+.guide { max-width: 720px; margin: 0 auto; text-align: left; }
+
+/* Шапка статьи */
+.guide-head { margin: 8px 0 34px; }
+.guide-kicker {
+  font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em;
+  color: var(--c-prog); margin-bottom: 12px;
+}
+.guide-title { font-size: 40px; font-weight: 700; letter-spacing: -0.03em; line-height: 1.1; margin: 0 0 12px; }
+.guide-lead { font-size: 19px; font-weight: 500; color: var(--muted); line-height: 1.45; margin: 0; }
+
+/* Вводный абзац — чуть крупнее основного текста */
+.guide-intro { font-size: 18px; line-height: 1.65; color: var(--ink); margin: 0; }
+
+/* Смысловой блок: подзаголовок + текст + врезки */
+.guide-block { margin-top: 40px; }
+.guide-block > h2 {
+  font-size: 23px; font-weight: 700; letter-spacing: -0.02em; line-height: 1.3;
+  margin: 0 0 14px;
+}
+.guide-block > p { font-size: 16px; line-height: 1.7; color: var(--ink); margin: 0 0 16px; }
+.guide-block > p:last-child { margin-bottom: 0; }
+
+/* Врезка «Что с этим делать» — голубая акцентная подложка (как «Контекст» в обучении) */
+.guide-do {
+  background: var(--tint); border-radius: 16px; padding: 18px 20px; margin-top: 18px;
+}
+/* Врезка «Лайфхак» — зелёная подложка (как «Лайфхак» в обучении) */
+.guide-tip {
+  background: var(--good-tint); border-radius: 16px; padding: 18px 20px; margin: 0 0 16px;
+}
+.guide-do-label {
+  font-weight: 700; font-size: 11px; text-transform: uppercase; letter-spacing: .07em;
+  margin-bottom: 7px; color: var(--c-learn);
+}
+.guide-tip .guide-do-label { color: var(--good); }
+.guide-do p, .guide-tip p { font-size: 15px; line-height: 1.6; color: var(--ink); margin: 0; }
+
+/* Итоговый вывод — выделенная карточка на акцентном фоне */
+.guide-conclusion {
+  margin-top: 44px; background: var(--accent); border-radius: 20px; padding: 26px 24px;
+}
+.guide-conclusion > h2 {
+  font-size: 20px; font-weight: 700; letter-spacing: -0.02em; margin: 0 0 12px;
+}
+.guide-conclusion > p { font-size: 16px; line-height: 1.7; color: var(--ink); margin: 0; }
+
+/* Тёплое прощание в конце статьи */
+.guide-signoff {
+  text-align: center; font-size: 17px; font-weight: 600; letter-spacing: -0.01em;
+  color: var(--ink); margin: 32px 0 28px;
+}
+
+/* --- Ссылка-вход на статью (в меню и в «Мой прогресс») --- */
+.guide-link-wrap { display: flex; justify-content: center; margin-top: 24px; }
+.guide-link {
+  display: inline-flex; align-items: center; gap: 9px;
+  background: none; border: none; cursor: pointer; font-family: inherit;
+  padding: 10px 18px; border-radius: 999px;
+  font-size: 15px; font-weight: 600; letter-spacing: -0.01em; color: var(--c-prog);
+  transition: background .15s, color .15s;
+}
+.guide-link svg { width: 18px; height: 18px; flex: none; }
+.guide-link:hover { background: rgba(142, 124, 198, .12); }
+.guide-link:focus-visible { outline: 3px solid rgba(29,29,27,.28); outline-offset: 2px; }
+
+/* ===================================================================== */
+/* =============  ЭКРАН ВЫБОРА ДИАПАЗОНА ТРЕНИРОВКИ  =================== */
+/* ===================================================================== */
+/* Акцентный цвет экрана зависит от режима (проставляется data-mode из JS):
+   зелёный для квиза, оранжевый для режима карточек. Есть нейтральный запас. */
+#screen-setup { --setup-accent: var(--brand); --setup-accent-tint: rgba(78, 116, 200, .12); }
+#screen-setup[data-mode="quiz"] { --setup-accent: var(--c-quiz);  --setup-accent-tint: rgba(63, 160, 139, .14); }
+#screen-setup[data-mode="flip"] { --setup-accent: var(--c-cards); --setup-accent-tint: rgba(206, 145, 72, .16); }
+
+.setup { max-width: 700px; margin: 0 auto; text-align: center; }
+.setup-kicker {
+  font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em;
+  color: var(--setup-accent); margin-bottom: 10px;
+}
+.setup-title { font-size: 32px; font-weight: 700; letter-spacing: -0.03em; margin: 0 0 10px; line-height: 1.1; }
+/* Пояснение — намеренно тише интерактивных элементов: мельче и светлее. */
+.setup-sub { color: var(--muted); font-size: 13.5px; line-height: 1.5; margin: 0 auto 26px; max-width: 46ch; opacity: .85; }
+
+/* Пресеты — ГЛАВНЫЙ путь выбора. Компактные таблетки; выделение активного —
+   ТОЛЬКО цветом/заливкой, а не размером. Раскладка: flex-wrap с центрированием —
+   кнопки идут в ряд, а при нехватке ширины переносятся и КАЖДАЯ строка остаётся
+   отцентрованной (без «одинокой» кнопки у левого края). Работает при любом их
+   количестве, поэтому добавление/удаление пресетов не ломает вид. */
+.setup-presets {
+  display: flex; flex-wrap: wrap; justify-content: center;
+  gap: 10px; margin-bottom: 24px;
+}
+.preset {
+  font-family: inherit; font-size: 14px; font-weight: 600; cursor: pointer;
+  padding: 11px 20px; border-radius: 999px; border: 1.5px solid var(--line);
+  background: var(--surface); color: var(--ink); box-shadow: var(--shadow-sm);
+  white-space: nowrap;
+  transition: border-color .2s, background .2s, color .2s, box-shadow .2s, transform .15s;
+}
+.preset:hover { border-color: var(--setup-accent); transform: translateY(-1px); }
+.preset.active {
+  background: var(--setup-accent); color: #fff; border-color: var(--setup-accent);
+  box-shadow: 0 6px 16px var(--setup-accent-tint);
+}
+.preset.active:hover { filter: brightness(.96); }
+.preset:focus-visible { outline: 3px solid var(--setup-accent-tint); outline-offset: 2px; }
+
+/* Подпись-разделитель: показывает, что ручной диапазон — запасной, редкий путь. */
+.setup-range-label {
+  font-size: 13px; font-weight: 500; color: var(--muted);
+  margin: 0 0 10px; opacity: .8;
+}
+
+/* Ручной диапазон — ВТОРОСТЕПЕННЫЙ путь, но оформлен как цельный просторный блок
+   во всю ширину контента (не тесная узкая вставка). Тише пресетов за счёт мягкой
+   подложки и лёгкой рамки, а не за счёт узости. */
+.setup-range {
+  display: flex; align-items: stretch; justify-content: center; gap: 18px;
+  background: var(--bg); border: 1px solid var(--line); box-shadow: none;
+  border-radius: 18px; padding: 22px 26px; margin: 0 auto 18px; width: 100%;
+  transition: opacity .2s;
+}
+.setup-range.disabled { opacity: .45; }   /* режим «Все выученные»: пул задаётся не отсюда */
+.range-field { display: flex; flex-direction: column; gap: 7px; text-align: left; flex: 1; min-width: 0; }
+.range-field label {
+  font-size: 11px; font-weight: 700; color: var(--muted); line-height: 1.2;
+  text-transform: uppercase; letter-spacing: .05em;
+}
+.range-field select {
+  font-family: inherit; font-size: 14px; font-weight: 500; color: var(--ink);
+  padding: 12px 40px 12px 14px; border-radius: 12px; border: 1px solid var(--line);
+  cursor: pointer; width: 100%; min-width: 0; text-overflow: ellipsis;
+  /* Свой чёткий шеврон вместо нативной стрелки ОС — одинаковый в обоих полях,
+     по центру высоты, на фиксированном отступе 14px от правого края. */
+  appearance: none; -webkit-appearance: none; -moz-appearance: none;
+  background-color: var(--surface);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%236B6B66' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+  background-size: 16px 16px;
+}
+.range-field select:focus { outline: none; border-color: var(--accent-deep); background-color: var(--surface); }
+.range-field select:disabled { cursor: not-allowed; }
+/* Стрелка между полями. Колонка «спейсер + глиф»: спейсер повторяет высоту
+   подписи над селектом (line-height 1.2 × 11px) плюс отступ поля (gap 7px),
+   поэтому глиф занимает ровно полосу селекта и центрируется точно по его центру
+   — независимо от высоты селекта и ширины экрана. По горизонтали симметрию
+   держит gap контейнера (18px с каждой стороны). */
+.range-arrow { flex: none; display: flex; flex-direction: column; }
+.ra-spacer { height: calc(11px * 1.2 + 7px); flex: none; }
+.ra-glyph {
+  flex: 1; display: flex; align-items: center; justify-content: center;
+  color: var(--muted); font-size: 20px;
+}
+
+/* Сводка «сколько дат в пуле» */
+.setup-summary { font-size: 14px; color: var(--muted); line-height: 1.5; margin: 0 auto 22px; max-width: 46ch; min-height: 21px; }
+
+/* Главное действие экрана — крупнее и залито акцентным цветом режима,
+   чтобы явно доминировать над тихой ghost-кнопкой «В меню». */
+#setup-start {
+  background: var(--setup-accent); color: #fff;
+  padding: 16px 34px; font-size: 17px;
+  box-shadow: 0 8px 20px var(--setup-accent-tint);
+}
+#setup-start:hover { background: var(--setup-accent); filter: brightness(.95); transform: translateY(-1px); }
+#setup-start:disabled { filter: none; }
+#setup-start:disabled:hover { background: var(--setup-accent); transform: none; }
+
+/* Заблокированная кнопка (пустой пул) */
+.btn:disabled { opacity: .4; cursor: not-allowed; transform: none; }
+.btn:disabled:hover { background: var(--ink); transform: none; }
+
 /* ===================================================================== */
 /* =======================  МОБИЛЬНАЯ ВЕРСИЯ  ========================== */
 /* ===================================================================== */
+/* ===================================================================== */
+/* ==============  ЗАКРЕПЛЁННАЯ ВЕРХНЯЯ ПАНЕЛЬ (topbar)  ================ */
+/* ===================================================================== */
+/* Растянута на всю ширину рамки .app (компенсируем её паддинги минусами),
+   липнет к верху экрана, лёгкое размытие фона под ней. */
+.topbar {
+  position: sticky; top: 0; z-index: 40;
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  margin: -22px -20px 16px; padding: 11px 20px;
+  background: rgba(244, 243, 239, .82);
+  backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--line);
+}
+.topbar-home { background: none; border: none; cursor: pointer; font-family: inherit; padding: 4px 2px; }
+.topbar-logo { font-size: 18px; font-weight: 700; letter-spacing: -0.02em; }
+/* Правая группа: ссылки-разделы + переключатель звука */
+.topbar-right { display: flex; align-items: center; gap: 6px; }
+.topbar-links { display: flex; gap: 2px; }
+
+/* Переключатель звука (иконка динамика) */
+.topbar-sound {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 38px; height: 38px; border-radius: 10px; flex: none;
+  background: none; border: none; cursor: pointer; color: var(--muted);
+  transition: background .15s, color .15s;
+}
+.topbar-sound svg { width: 19px; height: 19px; }
+.topbar-sound:hover { background: rgba(0, 0, 0, .045); color: var(--ink); }
+.topbar-sound:focus-visible { outline: 3px solid rgba(29,29,27,.28); outline-offset: 2px; }
+/* По умолчанию показываем «звук включён»; в состоянии .muted — перечёркнутый динамик */
+.topbar-sound .ico-off { display: none; }
+.topbar-sound.muted .ico-on { display: none; }
+.topbar-sound.muted .ico-off { display: block; }
+.tlink {
+  display: inline-flex; align-items: center; gap: 7px;
+  background: none; border: none; cursor: pointer; font-family: inherit;
+  padding: 8px 12px; border-radius: 10px; color: var(--muted);
+  font-size: 14px; font-weight: 600; letter-spacing: -0.01em;
+  transition: background .15s, color .15s;
+}
+.tlink svg { width: 18px; height: 18px; flex: none; }
+.tlink:hover { background: rgba(0, 0, 0, .045); color: var(--ink); }
+.tlink:focus-visible { outline: 3px solid rgba(29,29,27,.28); outline-offset: 2px; }
+/* Активный раздел — подсветка своим цветом (связь с цветовой схемой режимов) */
+.tlink.active { background: rgba(0, 0, 0, .05); }
+.tlink[data-sec="learn"].active { color: var(--c-learn); }
+.tlink[data-sec="quiz"].active { color: var(--c-quiz); }
+.tlink[data-sec="flip"].active { color: var(--c-cards); }
+.tlink[data-sec="progress"].active { color: var(--c-prog); }
+
+/* Контролы, где кнопка одна и должна быть справа */
+.controls--end { justify-content: flex-end; }
+/* Кнопки итога раунда — по центру */
+.controls--center { justify-content: center; flex-wrap: wrap; }
+
+/* Индикатор короткого раунда квиза: «Вопрос 3 из 7» */
+.round-progress {
+  font-size: 13px; font-weight: 600; color: var(--muted);
+  letter-spacing: .01em; margin: 0 0 12px; min-height: 18px;
+  font-variant-numeric: tabular-nums;
+}
+
+/* --- Обучение: триггер быстрого перехода к дате --- */
+.learn-tools { display: flex; justify-content: flex-end; margin-bottom: 12px; }
+.jump-btn {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: var(--surface); border: 1px solid var(--line); box-shadow: var(--shadow-sm);
+  border-radius: 999px; padding: 9px 16px; cursor: pointer; font-family: inherit;
+  font-size: 14px; font-weight: 600; color: var(--ink);
+  transition: border-color .2s, transform .15s;
+}
+.jump-btn svg { width: 16px; height: 16px; }
+.jump-btn:hover { border-color: var(--accent-deep); transform: translateY(-1px); }
+.jump-btn:focus-visible { outline: 3px solid rgba(29,29,27,.28); outline-offset: 2px; }
+
+/* --- Модалка выбора даты: поиск + прокручиваемый список --- */
+.modal--jump { max-width: 460px; text-align: left; }
+.jump-search {
+  width: 100%; margin: 14px 0 10px; padding: 11px 14px; border-radius: 12px;
+  border: 1px solid var(--line); background: var(--bg);
+  font-family: inherit; font-size: 15px; color: var(--ink);
+}
+.jump-search:focus { outline: none; border-color: var(--accent-deep); background: var(--surface); }
+.jump-list { max-height: 46vh; overflow-y: auto; display: flex; flex-direction: column; gap: 2px; margin-bottom: 14px; }
+.jump-item {
+  display: flex; align-items: baseline; gap: 12px; width: 100%; text-align: left;
+  background: none; border: none; cursor: pointer; font-family: inherit;
+  padding: 10px; border-radius: 10px; color: var(--ink); transition: background .15s;
+}
+.jump-item:hover { background: var(--tint); }
+.jump-item:focus-visible { outline: 3px solid rgba(29,29,27,.28); outline-offset: -2px; }
+.jump-date { font-weight: 700; font-size: 14px; flex: none; min-width: 96px; font-variant-numeric: tabular-nums; }
+.jump-event { font-size: 13px; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* --- Прогресс: сворачиваемые секции по эпохам --- */
+.epoch { border-top: 1px solid var(--line); }
+.epoch:first-child { border-top: none; }
+.epoch-head {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  width: 100%; padding: 14px 6px; background: none; border: none; cursor: pointer;
+  font-family: inherit; color: var(--ink); text-align: left; border-radius: 10px;
+  transition: background .15s;
+}
+.epoch-head:hover { background: var(--tint); }
+.epoch-head:focus-visible { outline: 3px solid rgba(29,29,27,.28); outline-offset: -2px; }
+.epoch-name { font-size: 15px; font-weight: 700; letter-spacing: -0.01em; }
+.epoch-meta { display: inline-flex; align-items: center; gap: 10px; flex: none; color: var(--muted); }
+.epoch-count {
+  font-size: 12px; font-weight: 700; min-width: 22px; text-align: center;
+  padding: 2px 7px; border-radius: 999px; background: var(--tint); color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+.epoch-chevron { font-size: 20px; line-height: 1; transition: transform .2s cubic-bezier(.2,.8,.2,1); }
+.epoch-head.open .epoch-chevron { transform: rotate(90deg); }
+/* Строки дат внутри секции: небольшой отступ слева, чтобы читались как вложенные */
+.epoch-body .stat-item { padding-left: 10px; }
+.epoch-body .stat-item:first-of-type { border-top: 1px solid var(--line); }
+
+/* Заголовок эпохи в модалке быстрого перехода (липкий разделитель) */
+.jump-epoch {
+  position: sticky; top: 0; z-index: 1;
+  background: var(--surface); color: var(--muted);
+  font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em;
+  padding: 8px 10px 4px;
+}
+
 @media (max-width: 768px) {
   .app { padding: 20px 20px 56px; }        /* боковые отступы страницы 20px */
+  /* Topbar на мобилке: логотип + иконки без подписей (компактный таб-бар) */
+  .topbar { margin: -20px -20px 14px; padding: 10px 16px; }
+  .tlink span { display: none; }
+  .tlink { padding: 9px; }
+  .topbar-logo { font-size: 16px; }
 
   /* --- Экран меню --- */
   #screen-menu { padding-top: 8px; }
-  .menu-title { font-size: 32px; margin-bottom: 48px; }   /* отступы между секциями 48px */
-  /* Стат-карточки остаются в ряд по 3, но компактнее */
-  .menu-tiles { grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 24px; }
-  .mtile { padding: 16px; border-radius: 16px; }
-  .mtile-num { font-size: 24px; }
-  .mtile-cap { font-size: 12px; margin-top: 6px; }
+  /* Брендовый лок-ап компактнее: маскот меньше, меньше отступ до плиток */
+  .brand { gap: 10px; margin-bottom: 40px; }
+  .brand-mascot .cat-svg { width: 60px; height: auto; }
+  .menu-title { font-size: 34px; }
+  /* Строка метрик в ряд по 3 — компактнее и легче карточек режимов */
+  .menu-tiles { margin-bottom: 24px; }
+  .mtile { padding: 2px 8px; gap: 5px; }
+  .mtile-num { font-size: 30px; }
+  .mtile-cap { font-size: 11px; }
+  .cap-ico { width: 13px; height: 13px; }
   /* Карточки режимов — в одну колонку */
   .mode-grid { grid-template-columns: 1fr; gap: 16px; }
   .mode-card { padding: 24px; }
@@ -506,6 +1064,25 @@ h1 { font-size: 34px; font-weight: 700; letter-spacing: -0.03em; margin: 20px 0 
   /* --- Прочие экраны --- */
   h1 { font-size: 32px; }
   .card { padding: 26px 20px; }
+  .flip-card { min-height: 260px; }
+  .flip-face { padding: 26px 20px; }
+
+  /* --- Экран выбора диапазона --- */
+  .setup-title { font-size: 26px; }
+  .setup-range { flex-direction: column; align-items: stretch; gap: 14px; }
+  /* В колонке стрелка смотрит вниз и стоит по центру между полями; спейсер не нужен. */
+  .range-arrow { align-self: center; padding: 0; }
+  .ra-spacer { display: none; }
+  .ra-glyph { transform: rotate(90deg); }
+
+  /* --- Статья «Как учить даты без стресса» --- */
+  .guide-title { font-size: 30px; }
+  .guide-lead { font-size: 17px; }
+  .guide-intro { font-size: 17px; }
+  .guide-block { margin-top: 32px; }
+  .guide-block > h2 { font-size: 20px; }
+  .guide-do, .guide-tip { padding: 16px 16px; }
+  .guide-conclusion { padding: 22px 18px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
