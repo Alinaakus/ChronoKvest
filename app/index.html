@@ -2,7 +2,12 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <!-- Ведём себя как приложение: запрещаем зум щипком/двойным тапом на мобильных -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <!-- Поведение «как приложение» при запуске с домашнего экрана iOS -->
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="mobile-web-app-capable" content="yes" />
   <title>ХроноКвест — тренажёр дат по истории</title>
   <!-- Шрифт Inter (Google Fonts) — чистая «эппловская» типографика -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />

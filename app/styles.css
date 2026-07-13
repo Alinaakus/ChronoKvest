@@ -32,12 +32,22 @@
 
 * { box-sizing: border-box; }
 
+/* Никакого горизонтального скролла и «убегания» элементов за край экрана.
+   overflow-x: hidden на html и body отсекает любое случайное переполнение
+   по ширине (например, от полноширинной шапки или сдвинутых декораций). */
+html {
+  overflow-x: hidden;
+}
+
 body {
   margin: 0;
   font-family: "Inter", -apple-system, system-ui, "Segoe UI", sans-serif;
   background: var(--bg);
   color: var(--ink);
   min-height: 100vh;
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
   line-height: 1.5;
   letter-spacing: -0.01em;
