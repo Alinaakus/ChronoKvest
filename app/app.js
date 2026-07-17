@@ -1550,9 +1550,63 @@ function confirmReset() {
   updateHomeProgress();
 }
 
+// ---------- «Что нового» (журнал обновлений) ----------
+// Данные лежат в changelog.js (массив CHANGELOG, свежее — сверху).
+// «Непросмотренность» считаем по id самой свежей записи: храним в localStorage
+// id последнего обновления, которое пользователь уже открывал. Пока свежий id
+// не совпадает с сохранённым — на иконке в панели горит точка-бейдж.
+const CHANGELOG_SEEN_KEY = "hq_changelog_seen_v1";
+
+// id самой свежей записи журнала (первый элемент массива) или null, если пусто.
+function latestChangelogId() {
+  return (typeof CHANGELOG !== "undefined" && CHANGELOG.length) ? CHANGELOG[0].id : null;
+}
+
+// Есть ли обновления, которые пользователь ещё не открывал.
+function hasUnseenChangelog() {
+  const latest = latestChangelogId();
+  if (!latest) return false;
+  return localStorage.getItem(CHANGELOG_SEEN_KEY) !== latest;
+}
+
+// Показать/скрыть точку-бейдж непросмотренных обновлений.
+function updateChangelogBadge() {
+  const dot = $("changelog-dot");
+  if (!dot) return;
+  dot.classList.toggle("hidden", !hasUnseenChangelog());
+}
+
+// Отрисовать список записей в модалке (хронология: свежее сверху).
+function renderChangelog() {
+  const box = $("changelog-list");
+  if (!box || typeof CHANGELOG === "undefined") return;
+  box.innerHTML = CHANGELOG.map((entry) => {
+    const items = (entry.items || []).map((t) => `<li>${t}</li>`).join("");
+    const title = entry.title ? `<div class="news-entry-title">${entry.title}</div>` : "";
+    return `<div class="news-entry">
+        <div class="news-date">${entry.date}</div>
+        ${title}
+        <ul class="news-items">${items}</ul>
+      </div>`;
+  }).join("");
+}
+
+function openChangelog() {
+  renderChangelog();
+  openModal("changelog-modal");
+  // Помечаем самую свежую запись как просмотренную — бейдж гаснет.
+  const latest = latestChangelogId();
+  if (latest) localStorage.setItem(CHANGELOG_SEEN_KEY, latest);
+  updateChangelogBadge();
+}
+function closeChangelog() {
+  closeModal("changelog-modal");
+}
+
 // ---------- Запуск ----------
 // Звук: показать состояние тумблера + тихий блип при наведении на карточки режимов.
 updateSoundUI();
+updateChangelogBadge(); // зажечь бейдж, если есть непросмотренные обновления
 document.querySelectorAll(".mode-card, .progress-nav").forEach((el) => {
   el.addEventListener("mouseenter", () => Sound.hover());
 });

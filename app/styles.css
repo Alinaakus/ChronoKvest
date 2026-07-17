@@ -947,6 +947,33 @@ h1 { font-size: 34px; font-weight: 700; letter-spacing: -0.03em; margin: 20px 0 
 .topbar-sound .ico-off { display: none; }
 .topbar-sound.muted .ico-on { display: none; }
 .topbar-sound.muted .ico-off { display: block; }
+/* «Что нового»: вход в журнал обновлений (иконка-искра в панели) */
+.topbar-news {
+  position: relative;
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 38px; height: 38px; border-radius: 10px; flex: none;
+  background: none; border: none; cursor: pointer; color: var(--muted);
+  transition: background .15s, color .15s;
+}
+.topbar-news svg { width: 19px; height: 19px; }
+.topbar-news:hover { background: rgba(0, 0, 0, .045); color: var(--ink); }
+.topbar-news:focus-visible { outline: 3px solid rgba(29,29,27,.28); outline-offset: 2px; }
+/* Точка-бейдж непросмотренных обновлений: мягкая пульсация привлекает взгляд.
+   Обводка цветом фона отделяет точку от иконки. */
+.topbar-news-dot {
+  position: absolute; top: 6px; right: 6px;
+  width: 9px; height: 9px; border-radius: 50%;
+  background: var(--c-quiz); border: 2px solid var(--bg);
+  animation: news-pulse 2s ease-in-out infinite;
+}
+@keyframes news-pulse {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.25); opacity: .85; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .topbar-news-dot { animation: none; }
+}
+
 .tlink {
   display: inline-flex; align-items: center; gap: 7px;
   background: none; border: none; cursor: pointer; font-family: inherit;
@@ -1015,6 +1042,30 @@ h1 { font-size: 34px; font-weight: 700; letter-spacing: -0.03em; margin: 20px 0 
   line-height: 1.3; overflow-wrap: anywhere; }
 .jump-event { font-size: 13px; color: var(--muted); min-width: 0;
   overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* --- Модалка «Что нового»: журнал обновлений --- */
+.modal--news { max-width: 480px; text-align: left; }
+.news-list {
+  max-height: 60vh; overflow-y: auto;
+  margin: 16px 0 18px; display: flex; flex-direction: column; gap: 22px;
+}
+/* Записи разделяются тонкой линией — читается как хронологическая лента */
+.news-entry + .news-entry { border-top: 1px solid var(--line); padding-top: 22px; }
+.news-date {
+  font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em;
+  color: var(--c-quiz); margin-bottom: 12px;
+}
+.news-entry-title { font-size: 15px; font-weight: 700; color: var(--ink); margin-bottom: 10px; letter-spacing: -0.01em; }
+.news-items { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 11px; }
+.news-items li {
+  position: relative; padding-left: 22px;
+  font-size: 14.5px; line-height: 1.5; color: var(--ink);
+}
+/* Маркер-точка вместо стандартного буллета — в акцентном цвете бренда */
+.news-items li::before {
+  content: ""; position: absolute; left: 3px; top: 8px;
+  width: 6px; height: 6px; border-radius: 50%; background: var(--accent-deep);
+}
 
 /* --- Прогресс: сворачиваемые секции по эпохам --- */
 .epoch { border-top: 1px solid var(--line); }
