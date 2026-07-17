@@ -999,14 +999,22 @@ h1 { font-size: 34px; font-weight: 700; letter-spacing: -0.03em; margin: 20px 0 
 .jump-search:focus { outline: none; border-color: var(--accent-deep); background: var(--surface); }
 .jump-list { max-height: 46vh; overflow-y: auto; display: flex; flex-direction: column; gap: 2px; margin-bottom: 14px; }
 .jump-item {
-  display: flex; align-items: baseline; gap: 12px; width: 100%; text-align: left;
+  /* Grid с ФИКСИРОВАННОЙ первой колонкой: дата всегда занимает ровно 116px,
+     поэтому колонка события начинается на одной и той же позиции во всех строках.
+     minmax(0, 1fr) у второй колонки позволяет ей ужиматься и включает многоточие. */
+  display: grid; grid-template-columns: 116px minmax(0, 1fr);
+  align-items: baseline; gap: 12px; width: 100%; text-align: left;
   background: none; border: none; cursor: pointer; font-family: inherit;
   padding: 10px; border-radius: 10px; color: var(--ink); transition: background .15s;
 }
 .jump-item:hover { background: var(--tint); }
 .jump-item:focus-visible { outline: 3px solid rgba(29,29,27,.28); outline-offset: -2px; }
-.jump-date { font-weight: 700; font-size: 14px; flex: none; min-width: 96px; font-variant-numeric: tabular-nums; }
-.jump-event { font-size: 13px; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+/* Дата не расширяет колонку: если длинный диапазон не влезает в 116px — переносится
+   на вторую строку внутри столбца (overflow-wrap), а не раздвигает разметку. */
+.jump-date { font-weight: 700; font-size: 14px; font-variant-numeric: tabular-nums;
+  line-height: 1.3; overflow-wrap: anywhere; }
+.jump-event { font-size: 13px; color: var(--muted); min-width: 0;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
 /* --- Прогресс: сворачиваемые секции по эпохам --- */
 .epoch { border-top: 1px solid var(--line); }

@@ -8,6 +8,54 @@ const $ = (id) => document.getElementById(id);
 const show = (id) => $(id).classList.remove("hidden");
 const hide = (id) => $(id).classList.add("hidden");
 
+// ---------- Блокировка прокрутки фона при открытом модальном окне ----------
+// Пока поверх страницы открыта модалка, задний план (страница карточки) не
+// должен скроллиться. На iOS Safari одного `overflow: hidden` мало — палец всё
+// равно «протаскивает» фон. Поэтому жёстко фиксируем body через position: fixed,
+// запоминая текущую позицию прокрутки и возвращая её при закрытии. Счётчик —
+// на случай, если вдруг откроется несколько модалок подряд: разблокируем фон
+// только когда закрылась последняя.
+let _scrollLockY = 0;
+let _scrollLockCount = 0;
+function lockBodyScroll() {
+  if (_scrollLockCount === 0) {
+    _scrollLockY = window.scrollY || window.pageYOffset || 0;
+    const b = document.body.style;
+    b.position = "fixed";
+    b.top = `-${_scrollLockY}px`;
+    b.left = "0";
+    b.right = "0";
+    b.width = "100%";
+    b.overflow = "hidden";
+  }
+  _scrollLockCount++;
+}
+function unlockBodyScroll() {
+  if (_scrollLockCount === 0) return;
+  _scrollLockCount--;
+  if (_scrollLockCount === 0) {
+    const b = document.body.style;
+    b.position = "";
+    b.top = "";
+    b.left = "";
+    b.right = "";
+    b.width = "";
+    b.overflow = "";
+    window.scrollTo(0, _scrollLockY); // возвращаем страницу на прежнее место
+  }
+}
+
+// Показ/скрытие модального окна вместе с блокировкой прокрутки фона.
+// Все модалки проекта должны открываться/закрываться через эти обёртки.
+function openModal(id) {
+  show(id);
+  lockBodyScroll();
+}
+function closeModal(id) {
+  hide(id);
+  unlockBodyScroll();
+}
+
 // =================== ЗВУКОВОЕ СОПРОВОЖДЕНИЕ (Web Audio API) ===================
 // Все звуки синтезируются кодом (без файлов). Единая палитра: мягкие
 // треугольные/синусоидные тоны с коротким «колокольным» затуханием и общим
@@ -750,11 +798,11 @@ function learnPrev() {
 function openJump() {
   $("jump-search").value = "";
   renderJumpList();
-  show("jump-modal");
+  openModal("jump-modal");
   $("jump-search").focus();
 }
 function closeJump() {
-  hide("jump-modal");
+  closeModal("jump-modal");
 }
 
 // Одна строка даты в списке быстрого перехода.
@@ -1488,16 +1536,16 @@ function openLearnAt(id) {
 
 // ---------- Сброс прогресса (с подтверждением) ----------
 function askReset() {
-  show("reset-modal");
+  openModal("reset-modal");
 }
 function closeReset() {
-  hide("reset-modal");
+  closeModal("reset-modal");
 }
 function confirmReset() {
   progress = defaultProgress();
   saveProgress();
   renderStreak();       // обнуляем и подпись серии
-  hide("reset-modal");
+  closeModal("reset-modal");
   renderProgress();
   updateHomeProgress();
 }
