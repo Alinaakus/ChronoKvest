@@ -672,7 +672,7 @@ h1 { font-size: 34px; font-weight: 700; letter-spacing: -0.03em; margin: 20px 0 
 /* Быстрый вход «Тренировать эти даты» под тегом «Сложные» */
 .hard-train {
   display: flex; align-items: center; flex-wrap: wrap; gap: 10px;
-  padding: 12px 14px; margin-bottom: 12px;
+  padding: 12px 14px; margin-top: 14px;
   background: var(--soft-tint); border-radius: 14px;
 }
 .hard-train-label { font-size: 13.5px; font-weight: 600; color: var(--soft); }
@@ -723,13 +723,22 @@ h1 { font-size: 34px; font-weight: 700; letter-spacing: -0.03em; margin: 20px 0 
   border-top: 1px solid var(--line);
   text-align: center; font-size: 13px; line-height: 1.5; color: var(--muted);
 }
-.app-footer a {
+/* Ряд из трёх ссылок с точками-разделителями; переносится на узких экранах */
+.footer-links {
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: center;
+  gap: 6px 10px;
+}
+.footer-sep { color: var(--line); user-select: none; }
+/* Ссылки-кнопки и mailto-ссылка выглядят одинаково: мелкий приглушённый текст */
+.footer-link {
+  background: none; border: none; padding: 0; cursor: pointer;
+  font-family: inherit; font-size: 13px; line-height: 1.5;
   color: var(--muted); text-decoration: underline;
   text-underline-offset: 2px; text-decoration-color: var(--line);
   transition: color .15s, text-decoration-color .15s;
 }
-.app-footer a:hover { color: var(--ink); text-decoration-color: var(--muted); }
-.app-footer a:focus-visible { outline: 3px solid rgba(29,29,27,.28); outline-offset: 2px; border-radius: 3px; }
+.footer-link:hover { color: var(--ink); text-decoration-color: var(--muted); }
+.footer-link:focus-visible { outline: 3px solid rgba(29,29,27,.28); outline-offset: 2px; border-radius: 3px; }
 
 /* ===================================================================== */
 /* ============  СТРАНИЦА «КАК УЧИТЬ ДАТЫ БЕЗ СТРЕССА»  ================= */
@@ -788,6 +797,23 @@ h1 { font-size: 34px; font-weight: 700; letter-spacing: -0.03em; margin: 20px 0 
 .guide-signoff {
   text-align: center; font-size: 17px; font-weight: 600; letter-spacing: -0.01em;
   color: var(--ink); margin: 32px 0 28px;
+}
+
+/* --- Страница «О проекте»: тёплый читаемый текст, много воздуха --- */
+.about-body { margin-top: 4px; }
+.about-body > p {
+  font-size: 18px; line-height: 1.7; color: var(--ink); margin: 0 0 20px;
+}
+.about-body > p:last-child { margin-bottom: 0; }
+.about-body a {
+  color: var(--c-quiz); text-decoration: underline;
+  text-underline-offset: 2px; text-decoration-color: var(--line);
+  transition: text-decoration-color .15s;
+}
+.about-body a:hover { text-decoration-color: var(--c-quiz); }
+.about-signoff {
+  font-size: 18px; font-weight: 600; letter-spacing: -0.01em;
+  color: var(--ink); margin-top: 28px !important;
 }
 
 /* --- Ссылка-вход на статью (в меню и в «Мой прогресс») --- */
@@ -1076,6 +1102,38 @@ h1 { font-size: 34px; font-weight: 700; letter-spacing: -0.03em; margin: 20px 0 
 .news-items li::before {
   content: ""; position: absolute; left: 3px; top: 8px;
   width: 6px; height: 6px; border-radius: 50%; background: var(--accent-deep);
+}
+
+/* «Лента анонсов» на главном экране: тонкая спокойная полоска, текст по центру.
+   Сообщения меняются плавным затуханием (opacity), без горизонтального движения.
+   Клик открывает модалку «Что нового». Оформление сдержанное — читается как
+   мягкий анонс, не как крикливый баннер. */
+.news-ticker {
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  /* Поуже полной ширины и по центру */
+  width: 100%; max-width: 520px; margin: 16px auto 0; box-sizing: border-box;
+  /* Фиксированная высота под 2 строки: длина сообщения меняется, а высота блока —
+     нет, поэтому футер и всё ниже не «прыгают» при смене текста. */
+  min-height: 64px; padding: 10px 20px;
+  /* Мягкая подложка «на пару оттенков темнее фона», без обводки (эппловский минимализм) */
+  background: rgba(29, 29, 27, .035); border: none; border-radius: var(--radius);
+  cursor: pointer; font-family: inherit; text-align: center;
+  transition: background .15s;
+}
+.news-ticker:hover { background: rgba(29, 29, 27, .06); }
+.news-ticker:focus-visible { outline: 3px solid rgba(29,29,27,.28); outline-offset: 2px; }
+.news-ticker-text {
+  /* Нежирный приглушённый текст; максимум 2 строки (лишнее — многоточием),
+     чтобы высота блока оставалась постоянной. Полный текст — по клику в «Что нового». */
+  font-size: 14.5px; font-weight: 400; line-height: 1.45; color: rgba(29, 29, 27, .5);
+  letter-spacing: -0.01em;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+  /* Плавная смена: JS вешает .fade (opacity:0), меняет текст, снимает .fade */
+  opacity: 1; transition: opacity .45s ease;
+}
+.news-ticker-text.fade { opacity: 0; }
+@media (prefers-reduced-motion: reduce) {
+  .news-ticker-text { transition: none; }
 }
 
 /* --- Прогресс: сворачиваемые секции по эпохам --- */

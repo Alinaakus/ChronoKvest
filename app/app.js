@@ -503,7 +503,7 @@ function dateWord(n) {
 }
 
 function showScreen(name) {
-  ["hero", "menu", "learn", "quiz", "done", "progress", "flip", "guide", "setup"].forEach((s) => hide("screen-" + s));
+  ["hero", "menu", "learn", "quiz", "done", "progress", "flip", "guide", "about", "setup"].forEach((s) => hide("screen-" + s));
   show("screen-" + name);
   updateTopbar(name);
   window.scrollTo(0, 0); // новый экран всегда открываем с начала (важно для длинной статьи)
@@ -1260,6 +1260,11 @@ function showGuide() {
   showScreen("guide");
 }
 
+// Раздел «О проекте» — личный текст от автора.
+function showAbout() {
+  showScreen("about");
+}
+
 // Короткая сводка на главной: «Выучено X из N дат».
 // (оставлена для совместимости; #home-progress мог быть удалён из разметки —
 //  поэтому внутри проверка if(el).)
@@ -1614,10 +1619,52 @@ function closeChangelog() {
   closeModal("changelog-modal");
 }
 
+// ---------- Лента анонсов на главном экране ----------
+// Разворачиваем CHANGELOG в плоский список коротких сообщений: по одному на
+// каждый пункт каждой записи, вида «🎉 Обновление {дата}: {пункт}». Порядок —
+// как в массиве (свежее → старое), затем цикл с начала.
+function buildNewsMessages() {
+  if (typeof CHANGELOG === "undefined") return [];
+  const out = [];
+  CHANGELOG.forEach((entry) => {
+    (entry.items || []).forEach((item) => {
+      out.push(`Обновление ${entry.date}: ${item}`);
+    });
+  });
+  return out;
+}
+
+// Запускаем циклическую смену сообщений с плавным затуханием (fade).
+function initNewsTicker() {
+  const bar = $("news-ticker");
+  const label = $("news-ticker-text");
+  if (!bar || !label) return;
+
+  const msgs = buildNewsMessages();
+  if (!msgs.length) return;        // нечего показывать — полоска остаётся скрытой
+
+  label.textContent = msgs[0];
+  bar.classList.remove("hidden");  // показываем только когда есть что показать
+  if (msgs.length === 1) return;   // одно сообщение — без цикла и анимации
+
+  let i = 0;
+  const HOLD = 7500;               // сколько сообщение висит статично, мс
+  const FADE = 450;                // длительность затухания (совпадает с CSS), мс
+  setInterval(() => {
+    label.classList.add("fade");   // текущее плавно гаснет
+    setTimeout(() => {
+      i = (i + 1) % msgs.length;   // следующее (по кругу)
+      label.textContent = msgs[i];
+      label.classList.remove("fade"); // и плавно появляется
+    }, FADE);
+  }, HOLD);
+}
+
 // ---------- Запуск ----------
 // Звук: показать состояние тумблера + тихий блип при наведении на карточки режимов.
 updateSoundUI();
 updateChangelogBadge(); // зажечь бейдж, если есть непросмотренные обновления
+initNewsTicker();       // запустить ленту анонсов на главном экране
 document.querySelectorAll(".mode-card, .progress-nav").forEach((el) => {
   el.addEventListener("mouseenter", () => Sound.hover());
 });
