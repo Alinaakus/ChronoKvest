@@ -329,6 +329,54 @@ h1 { font-size: 34px; font-weight: 700; letter-spacing: -0.03em; margin: 20px 0 
 .block-context .block-title { color: var(--ink); }
 .block-lifehack { background: var(--good-tint); }
 .block-lifehack .block-title { color: var(--good); }
+
+/* --- Своя ассоциация: сдержанный нейтральный блок (не конкурирует по цвету) --- */
+.assoc-wrap { width: 100%; }
+/* Нейтральный серый фон вместо цветных тинтов «Контекст»/«Лайфхак» */
+.block-assoc { background: rgba(29, 29, 27, .045); }
+.block-assoc .block-title { color: var(--muted); }
+.block-assoc-head {
+  display: flex; align-items: center; justify-content: space-between; gap: 8px;
+}
+.assoc-actions { display: flex; gap: 2px; flex: none; }
+/* Маленькие иконки правки/удаления — приглушённые, проявляются при наведении */
+.assoc-icon {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 28px; height: 28px; border-radius: 8px;
+  background: none; border: none; cursor: pointer; color: var(--muted);
+  transition: background .15s, color .15s;
+}
+.assoc-icon svg { width: 15px; height: 15px; }
+.assoc-icon:hover { background: rgba(29, 29, 27, .07); color: var(--ink); }
+.assoc-icon:focus-visible { outline: 3px solid rgba(29,29,27,.28); outline-offset: 1px; }
+#learn-assoc-text { margin-top: 2px; }
+
+/* Кнопка «Создать свою ассоциацию» — спокойная, в тон нейтральному блоку */
+.assoc-add {
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  width: 100%; padding: 13px 16px;
+  background: rgba(29, 29, 27, .045); border: none; border-radius: 16px;
+  font-family: inherit; font-size: 14px; font-weight: 600; color: var(--muted);
+  cursor: pointer; transition: background .15s, color .15s;
+}
+.assoc-add svg { width: 16px; height: 16px; flex: none; }
+.assoc-add:hover { background: rgba(29, 29, 27, .075); color: var(--ink); }
+.assoc-add:focus-visible { outline: 3px solid rgba(29,29,27,.28); outline-offset: 2px; }
+
+/* Редактор ассоциации */
+.assoc-textarea {
+  width: 100%; box-sizing: border-box; resize: vertical; min-height: 84px;
+  padding: 12px 14px; border: 1px solid var(--line); border-radius: 14px;
+  background: var(--surface); color: var(--ink);
+  font-family: inherit; font-size: 15px; line-height: 1.55;
+}
+.assoc-textarea:focus { outline: none; border-color: var(--accent-deep); }
+.assoc-editor-foot {
+  display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  margin-top: 8px;
+}
+.assoc-counter { font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.assoc-editor-btns { display: flex; gap: 8px; }
 .card-done h2 { margin: 6px 0; font-size: 26px; font-weight: 700; letter-spacing: -0.02em; }
 .card-done .card-character { font-size: 56px; line-height: 1; }
 

@@ -257,6 +257,45 @@
             <div id="learn-lifehack">—</div>
           </div>
         </div>
+
+        <!-- Своя ассоциация: личная заметка пользователя к этой дате.
+             Хранится в localStorage (см. app.js). Три взаимоисключающих состояния:
+             сохранённый блок / кнопка создания / редактор — переключает renderAssoc(). -->
+        <div class="assoc-wrap">
+          <!-- Сохранённая ассоциация (видна только если текст есть) -->
+          <div class="block block-assoc hidden" id="learn-assoc-block">
+            <div class="block-assoc-head">
+              <div class="block-title">Моя ассоциация</div>
+              <div class="assoc-actions">
+                <button class="assoc-icon" onclick="editAssoc()" aria-label="Редактировать ассоциацию" title="Редактировать">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+                </button>
+                <button class="assoc-icon" onclick="deleteAssoc()" aria-label="Удалить ассоциацию" title="Удалить">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M6 6l1 14h10l1-14"/></svg>
+                </button>
+              </div>
+            </div>
+            <div id="learn-assoc-text"></div>
+          </div>
+
+          <!-- Кнопка создания (видна только если ассоциации ещё нет) -->
+          <button class="assoc-add" id="learn-assoc-add" onclick="openAssocEditor()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14"/><path d="M5 12h14"/></svg>
+            <span>Создать свою ассоциацию</span>
+          </button>
+
+          <!-- Редактор: поле ввода + счётчик + кнопки (скрыт по умолчанию) -->
+          <div class="assoc-editor hidden" id="learn-assoc-editor">
+            <textarea class="assoc-textarea" id="learn-assoc-input" maxlength="300" rows="3" placeholder="Своя ассоциация, рифма или образ для этой даты…" oninput="updateAssocCounter()"></textarea>
+            <div class="assoc-editor-foot">
+              <span class="assoc-counter" id="learn-assoc-counter">0 / 300</span>
+              <span class="assoc-editor-btns">
+                <button class="btn btn-ghost btn-sm" onclick="cancelAssoc()">Отмена</button>
+                <button class="btn btn-primary btn-sm" onclick="saveAssoc()">Сохранить</button>
+              </span>
+            </div>
+          </div>
+        </div>
       </div>
       <div class="controls">
         <button class="btn btn-ghost" id="learn-prev" onclick="learnPrev()">← Назад</button>

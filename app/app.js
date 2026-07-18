@@ -776,6 +776,8 @@ function renderLearnCard() {
   const lifehackBlock = $("learn-lifehack").closest(".block-lifehack");
   if (lifehackBlock) lifehackBlock.style.display = card.lifehack ? "" : "none";
 
+  renderAssoc(); // личная ассоциация пользователя (localStorage)
+
   // путь: пройденными считаем все карточки до текущей
   const done = new Set(CARDS.slice(0, learnIndex).map((c) => c.id));
   renderPath(done, card.id);
@@ -784,6 +786,91 @@ function renderLearnCard() {
   $("learn-prev").style.visibility = learnIndex === 0 ? "hidden" : "visible";
   $("learn-next").textContent =
     learnIndex === CARDS.length - 1 ? "Завершить ✓" : "Далее →";
+}
+
+// ---------- Своя ассоциация (личная заметка к дате) ----------
+// Храним в localStorage как объект { [id даты]: "текст" }.
+const ASSOC_KEY = "hq_assoc_v1";
+const ASSOC_MAX = 300;
+
+function loadAssocs() {
+  try {
+    return JSON.parse(localStorage.getItem(ASSOC_KEY)) || {};
+  } catch (e) {
+    return {}; // если данные повреждены — считаем, что ассоциаций нет
+  }
+}
+function saveAssocs(obj) {
+  localStorage.setItem(ASSOC_KEY, JSON.stringify(obj));
+}
+// Текст ассоциации для текущей карточки обучения ("" — если нет).
+function currentAssoc() {
+  const card = CARDS[learnIndex];
+  return card ? (loadAssocs()[card.id] || "") : "";
+}
+
+// Показать нужное состояние: сохранённый блок / кнопку / (редактор прячем).
+function renderAssoc() {
+  const block = $("learn-assoc-block");
+  const add = $("learn-assoc-add");
+  const editor = $("learn-assoc-editor");
+  if (!block || !add || !editor) return;
+
+  editor.classList.add("hidden"); // при смене карточки редактор всегда закрыт
+  const text = currentAssoc();
+  if (text) {
+    $("learn-assoc-text").textContent = text;
+    block.classList.remove("hidden");
+    add.classList.add("hidden");
+  } else {
+    block.classList.add("hidden");
+    add.classList.remove("hidden");
+  }
+}
+
+// Обновить счётчик символов под полем ввода.
+function updateAssocCounter() {
+  const input = $("learn-assoc-input");
+  const counter = $("learn-assoc-counter");
+  if (input && counter) counter.textContent = `${input.value.length} / ${ASSOC_MAX}`;
+}
+
+// Открыть редактор (для новой ассоциации или для правки существующей).
+function openAssocEditor() {
+  const input = $("learn-assoc-input");
+  input.value = currentAssoc();               // пусто для новой, текст — для правки
+  $("learn-assoc-block").classList.add("hidden");
+  $("learn-assoc-add").classList.add("hidden");
+  $("learn-assoc-editor").classList.remove("hidden");
+  updateAssocCounter();
+  input.focus();
+}
+function editAssoc() { openAssocEditor(); }
+
+// Сохранить: пустой текст трактуем как отмену/удаление, иначе пишем в хранилище.
+function saveAssoc() {
+  const card = CARDS[learnIndex];
+  if (!card) return;
+  const text = $("learn-assoc-input").value.trim().slice(0, ASSOC_MAX);
+  const all = loadAssocs();
+  if (text) all[card.id] = text;
+  else delete all[card.id];
+  saveAssocs(all);
+  renderAssoc();
+}
+function cancelAssoc() {
+  renderAssoc(); // просто вернуть предыдущее состояние (блок или кнопку)
+}
+
+// Удалить ассоциацию (с подтверждением, чтобы не потерять по случайному нажатию).
+function deleteAssoc() {
+  const card = CARDS[learnIndex];
+  if (!card) return;
+  if (!confirm("Удалить свою ассоциацию к этой дате?")) return;
+  const all = loadAssocs();
+  delete all[card.id];
+  saveAssocs(all);
+  renderAssoc();
 }
 
 // Шаг назад по карточкам обучения (к предыдущей дате).
