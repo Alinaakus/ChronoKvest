@@ -1562,18 +1562,29 @@ function latestChangelogId() {
   return (typeof CHANGELOG !== "undefined" && CHANGELOG.length) ? CHANGELOG[0].id : null;
 }
 
-// Есть ли обновления, которые пользователь ещё не открывал.
-function hasUnseenChangelog() {
-  const latest = latestChangelogId();
-  if (!latest) return false;
-  return localStorage.getItem(CHANGELOG_SEEN_KEY) !== latest;
+// Сколько записей журнала пользователь ещё не открывал. Записи идут свежими
+// сверху, поэтому непросмотренные — это все записи ВЫШЕ последней просмотренной.
+// Если ничего не сохранено (первый визит) — непросмотрены все записи.
+function unseenChangelogCount() {
+  if (typeof CHANGELOG === "undefined" || !CHANGELOG.length) return 0;
+  const seen = localStorage.getItem(CHANGELOG_SEEN_KEY);
+  if (!seen) return CHANGELOG.length;
+  const idx = CHANGELOG.findIndex((e) => e.id === seen);
+  return idx === -1 ? CHANGELOG.length : idx; // idx = число записей над просмотренной
 }
 
-// Показать/скрыть точку-бейдж непросмотренных обновлений.
+// Есть ли обновления, которые пользователь ещё не открывал.
+function hasUnseenChangelog() {
+  return unseenChangelogCount() > 0;
+}
+
+// Обновить бейдж-счётчик непросмотренных обновлений: показать число или скрыть.
 function updateChangelogBadge() {
   const dot = $("changelog-dot");
   if (!dot) return;
-  dot.classList.toggle("hidden", !hasUnseenChangelog());
+  const n = unseenChangelogCount();
+  dot.textContent = n > 9 ? "9+" : String(n); // не даём бейджу разрастаться
+  dot.classList.toggle("hidden", n === 0);
 }
 
 // Отрисовать список записей в модалке (хронология: свежее сверху).

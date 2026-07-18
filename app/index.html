@@ -21,9 +21,20 @@
     <!-- Закреплённая верхняя панель: сквозная навигация по разделам.
          Прячется на hero и в меню (управляется из app.js). -->
     <nav class="topbar hidden" id="topbar" aria-label="Разделы приложения">
-      <button class="topbar-home" onclick="goMenu()" aria-label="В меню">
-        <span class="topbar-logo logo"><span class="lg-chrono">Хроно</span><span class="lg-quest">Квест</span></span>
-      </button>
+      <!-- Левая группа: бренд + вход в «Обновления». Кнопка «Обновления» стоит
+           рядом с логотипом (это мета-информация о продукте), а не среди вкладок. -->
+      <div class="topbar-left">
+        <button class="topbar-home" onclick="goMenu()" aria-label="В меню">
+          <span class="topbar-logo logo"><span class="lg-chrono">Хроно</span><span class="lg-quest">Квест</span></span>
+        </button>
+        <!-- «Что нового»: таблетка с иконкой и подписью. Бейдж #changelog-dot
+             показывает число непросмотренных обновлений (гаснет после открытия). -->
+        <button class="topbar-news" id="changelog-btn" onclick="openChangelog()" aria-label="Обновления — что нового" title="Что нового">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l1.9 4.6L18.5 9l-4.6 1.9L12 15.5 10.1 10.9 5.5 9l4.6-1.4L12 3Z"/><path d="M19 15l.7 1.8L21.5 17.5l-1.8.7L19 20l-.7-1.8L16.5 17.5l1.8-.7L19 15Z"/></svg>
+          <span class="topbar-news-label">Обновления</span>
+          <span class="topbar-news-dot hidden" id="changelog-dot" aria-hidden="true"></span>
+        </button>
+      </div>
       <div class="topbar-right">
         <div class="topbar-links">
         <button class="tlink" data-sec="learn" onclick="startLearn()">
@@ -43,12 +54,6 @@
           <span>Прогресс</span>
         </button>
         </div>
-        <!-- «Что нового»: ненавязчивый вход в журнал обновлений.
-             Точка-бейдж (#changelog-dot) горит, пока есть непросмотренные обновления. -->
-        <button class="topbar-news" id="changelog-btn" onclick="openChangelog()" aria-label="Что нового" title="Что нового">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l1.9 4.6L18.5 9l-4.6 1.9L12 15.5 10.1 10.9 5.5 9l4.6-1.4L12 3Z"/><path d="M19 15l.7 1.8L21.5 17.5l-1.8.7L19 20l-.7-1.8L16.5 17.5l1.8-.7L19 15Z"/></svg>
-          <span class="topbar-news-dot hidden" id="changelog-dot" aria-hidden="true"></span>
-        </button>
         <!-- Переключатель звука (вкл/выкл, сохраняется в localStorage) -->
         <button class="topbar-sound" id="sound-toggle" onclick="toggleSound()" aria-pressed="true" aria-label="Выключить звук" title="Звук включён">
           <svg class="ico-sound ico-on" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 5 6 9H2v6h4l5 4V5Z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M19 5a9 9 0 0 1 0 14"/></svg>

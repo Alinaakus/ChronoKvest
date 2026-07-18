@@ -927,6 +927,8 @@ h1 { font-size: 34px; font-weight: 700; letter-spacing: -0.03em; margin: 20px 0 
   backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
   border-bottom: 1px solid var(--line);
 }
+/* Левая группа: бренд + вход в «Обновления» (мета-инфо о продукте) */
+.topbar-left { display: flex; align-items: center; gap: 12px; min-width: 0; }
 .topbar-home { background: none; border: none; cursor: pointer; font-family: inherit; padding: 4px 2px; }
 .topbar-logo { font-size: 18px; font-weight: 700; letter-spacing: -0.02em; }
 /* Правая группа: ссылки-разделы + переключатель звука */
@@ -947,28 +949,37 @@ h1 { font-size: 34px; font-weight: 700; letter-spacing: -0.03em; margin: 20px 0 
 .topbar-sound .ico-off { display: none; }
 .topbar-sound.muted .ico-on { display: none; }
 .topbar-sound.muted .ico-off { display: block; }
-/* «Что нового»: вход в журнал обновлений (иконка-искра в панели) */
+/* «Что нового»: таблетка-вход в журнал обновлений рядом с логотипом.
+   Форма-«таблетка» с лёгким фоном и обводкой намеренно отличает её от вкладок
+   навигации (Обучение/Квиз/…) — это отдельная категория: мета-инфо о продукте. */
 .topbar-news {
-  position: relative;
-  display: inline-flex; align-items: center; justify-content: center;
-  width: 38px; height: 38px; border-radius: 10px; flex: none;
-  background: none; border: none; cursor: pointer; color: var(--muted);
-  transition: background .15s, color .15s;
+  position: relative; flex: none;
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 6px 12px 6px 10px; border-radius: 999px;
+  background: var(--accent); border: 1px solid var(--accent-deep);
+  cursor: pointer; font-family: inherit;
+  font-size: 13px; font-weight: 600; letter-spacing: -0.01em; color: var(--ink);
+  transition: filter .15s, transform .15s, box-shadow .15s;
 }
-.topbar-news svg { width: 19px; height: 19px; }
-.topbar-news:hover { background: rgba(0, 0, 0, .045); color: var(--ink); }
+.topbar-news svg { width: 15px; height: 15px; color: var(--c-quiz); }
+.topbar-news:hover { filter: brightness(.97); transform: translateY(-1px); box-shadow: var(--shadow-sm); }
 .topbar-news:focus-visible { outline: 3px solid rgba(29,29,27,.28); outline-offset: 2px; }
-/* Точка-бейдж непросмотренных обновлений: мягкая пульсация привлекает взгляд.
-   Обводка цветом фона отделяет точку от иконки. */
+.topbar-news-label { line-height: 1; }
+/* Бейдж-счётчик непросмотренных обновлений: заметный кружок в акцентном цвете,
+   с числом внутри. Обводка цветом фона отделяет его от таблетки. Мягкая пульсация
+   привлекает взгляд, не мельтеша. */
 .topbar-news-dot {
-  position: absolute; top: 6px; right: 6px;
-  width: 9px; height: 9px; border-radius: 50%;
-  background: var(--c-quiz); border: 2px solid var(--bg);
-  animation: news-pulse 2s ease-in-out infinite;
+  position: absolute; top: -6px; right: -6px;
+  min-width: 18px; height: 18px; padding: 0 5px; box-sizing: border-box;
+  display: inline-flex; align-items: center; justify-content: center;
+  border-radius: 999px; background: var(--c-quiz); color: #fff;
+  font-size: 11px; font-weight: 800; line-height: 1; font-variant-numeric: tabular-nums;
+  border: 2px solid var(--bg); box-shadow: 0 1px 3px rgba(0, 0, 0, .18);
+  animation: news-pulse 2.4s ease-in-out infinite;
 }
 @keyframes news-pulse {
-  0%, 100% { transform: scale(1); opacity: 1; }
-  50% { transform: scale(1.25); opacity: .85; }
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.12); }
 }
 @media (prefers-reduced-motion: reduce) {
   .topbar-news-dot { animation: none; }
@@ -1106,6 +1117,12 @@ h1 { font-size: 34px; font-weight: 700; letter-spacing: -0.03em; margin: 20px 0 
   .tlink span { display: none; }
   .tlink { padding: 9px; }
   .topbar-logo { font-size: 16px; }
+  /* Кнопка «Обновления» на мобилке: подпись прячем, остаётся иконка + бейдж —
+     таблетка компактная, но по-прежнему заметная и отличная от вкладок. */
+  .topbar-left { gap: 8px; }
+  .topbar-news-label { display: none; }
+  .topbar-news { padding: 8px; }
+  .topbar-news svg { width: 17px; height: 17px; }
 
   /* --- Экран меню --- */
   #screen-menu { padding-top: 8px; }
