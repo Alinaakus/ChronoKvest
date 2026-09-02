@@ -764,6 +764,71 @@ h1 { font-size: 34px; font-weight: 700; letter-spacing: -0.03em; margin: 20px 0 
 .modal-actions { display: flex; gap: 10px; }
 .modal-actions .btn { flex: 1; }
 
+/* --- «Машина времени»: пост-«твит» со случайной датой --- */
+/* Маскот на hero кликабелен — курсор-указатель + короткий «зум» по клику.
+   translateX(-50%) сохраняем: маскот спозиционирован по центру через него. */
+/* Маскот по умолчанию pointer-events:none (см. выше) — возвращаем клики,
+   чтобы по нему запускалась «машина времени». */
+.hero-mascot { cursor: pointer; pointer-events: auto; }
+.hero-mascot.tm-zoom { animation: tmZoom .4s ease; }
+@keyframes tmZoom {
+  0%, 100% { transform: translateX(-50%) scale(1); }
+  45% { transform: translateX(-50%) scale(1.08); }
+}
+/* Затемнение + мягкое размытие фона — эффект «фокусировки» на карточке */
+.tm-overlay {
+  background: rgba(20, 20, 40, .28);
+  backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+}
+/* Карточка-твит: чистая, воздушная; пружинное появление с лёгким овершутом */
+.tweet-card {
+  background: var(--surface); border-radius: 20px; box-shadow: var(--shadow);
+  padding: 22px 22px 18px; max-width: 440px; width: 100%; text-align: left;
+  animation: tweetIn .5s cubic-bezier(.22, 1, .36, 1);
+}
+@keyframes tweetIn {
+  0% { opacity: 0; transform: translateY(12px) scale(.94); }
+  60% { opacity: 1; transform: translateY(-2px) scale(1.01); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+.tweet-head { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+.tweet-avatar {
+  width: 46px; height: 46px; border-radius: 50%; flex: none; overflow: hidden;
+  background: var(--accent); display: flex; align-items: center; justify-content: center;
+}
+.tweet-avatar svg { width: 40px; height: 40px; }
+.tweet-id { min-width: 0; }
+.tweet-author { font-weight: 700; font-size: 15px; color: var(--ink); letter-spacing: -0.01em; }
+.tweet-meta { display: flex; align-items: center; gap: 5px; font-size: 13px; color: var(--muted); }
+.tweet-dot { opacity: .7; }
+.tweet-text { font-size: 16px; line-height: 1.55; color: var(--ink); }
+.tweet-foot { margin-top: 18px; display: flex; flex-direction: column; gap: 14px; }
+/* Тихая ссылка «Узнать больше» — не кричит, в бирюзовом акценте */
+.tweet-more {
+  align-self: flex-start; font-size: 14px; font-weight: 600;
+  color: var(--c-quiz); text-decoration: none;
+}
+.tweet-more:hover { text-decoration: underline; text-underline-offset: 2px; }
+.tweet-more:focus-visible { outline: 3px solid rgba(29,29,27,.28); outline-offset: 2px; border-radius: 3px; }
+.tweet-actions { display: flex; gap: 10px; justify-content: flex-end; }
+/* «Ещё дата»: мягкая смена содержимого */
+.tweet-card.tm-reroll .tweet-text,
+.tweet-card.tm-reroll .tweet-head { animation: tweetReroll .35s ease; }
+@keyframes tweetReroll {
+  0% { opacity: .2; transform: translateY(4px); }
+  100% { opacity: 1; transform: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .tweet-card,
+  .tweet-card.tm-reroll .tweet-text,
+  .tweet-card.tm-reroll .tweet-head,
+  .hero-mascot.tm-zoom { animation: none; }
+}
+@media (max-width: 560px) {
+  .tweet-card { padding: 20px 18px 16px; }
+  .tweet-text { font-size: 15.5px; }
+}
+
 /* --- Футер: контакт для обратной связи --- */
 /* Ненавязчивая строка внизу страницы, видна на всех экранах. */
 .app-footer {

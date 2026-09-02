@@ -66,7 +66,12 @@
          Только: кот сверху, «машина времени» → «ХроноКвест», слоган и одна кнопка. -->
     <section class="screen hero-screen" id="screen-hero">
       <div class="hero hero--big">
-        <div class="hero-mascot" id="hero-mascot"></div>
+        <!-- Маскот кликабелен: запускает «Машину времени» (в дополнение к кнопке ниже).
+             role/tabindex/onkeydown — чтобы работал и с клавиатуры. -->
+        <div class="hero-mascot" id="hero-mascot" role="button" tabindex="0"
+             aria-label="Машина времени — показать случайную дату"
+             onclick="openTimeMachine()"
+             onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openTimeMachine();}"></div>
         <div class="hero-display">
           <div class="hero-year" id="hero-year">862</div>
           <div class="hero-title" id="hero-title" aria-label="ХроноКвест"></div>
@@ -536,6 +541,28 @@
       </div>
     </div>
 
+    <!-- Модалка «Машина времени»: случайная дата в виде поста-«твита».
+         Содержимое наполняется из timemachine.js через renderTimePost(). -->
+    <div class="modal-overlay tm-overlay hidden" id="timemachine-modal" onclick="if(event.target===this)closeTimeMachine()">
+      <div class="tweet-card" id="tweet-card" role="dialog" aria-label="Случайная дата из истории">
+        <div class="tweet-head">
+          <div class="tweet-avatar" id="tweet-avatar" aria-hidden="true"></div>
+          <div class="tweet-id">
+            <div class="tweet-author" id="tweet-author"></div>
+            <div class="tweet-meta"><span class="tweet-handle" id="tweet-handle"></span><span class="tweet-dot">·</span><span class="tweet-year" id="tweet-year"></span></div>
+          </div>
+        </div>
+        <div class="tweet-text" id="tweet-text"></div>
+        <div class="tweet-foot">
+          <a class="tweet-more" id="tweet-more" href="#" onclick="goToCardFromTime(event)">Узнать больше об этой дате →</a>
+          <div class="tweet-actions">
+            <button class="btn btn-ghost btn-sm" onclick="rerollTimeMachine()">Ещё дата</button>
+            <button class="btn btn-primary btn-sm" onclick="closeTimeMachine()">Закрыть</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- Модалка подтверждения сброса -->
     <div class="modal-overlay hidden" id="reset-modal">
       <div class="modal">
@@ -564,6 +591,7 @@
   <!-- Сначала данные, потом логика -->
   <script src="data.js"></script>
   <script src="changelog.js"></script>
+  <script src="timemachine.js"></script>
   <script src="app.js"></script>
 </body>
 </html>

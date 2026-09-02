@@ -1445,6 +1445,82 @@ function playHero() {
   step();
 }
 
+// ---------- «Машина времени» (клик по маскоту на hero) ----------
+// Показывает случайный пост-«твит» из TIME_POSTS. Запускается ТОЛЬКО по клику
+// пользователя (не автоматически). Повторные клики дают новую дату.
+let tmLastIndex = -1;   // чтобы не повторять один и тот же пост подряд
+let tmCurrent = null;   // текущий показанный пост (для «Узнать больше»)
+
+// Случайный пост, по возможности не совпадающий с предыдущим.
+function pickTimePost() {
+  if (typeof TIME_POSTS === "undefined" || !TIME_POSTS.length) return null;
+  if (TIME_POSTS.length === 1) return TIME_POSTS[0];
+  let i;
+  do { i = Math.floor(Math.random() * TIME_POSTS.length); } while (i === tmLastIndex);
+  tmLastIndex = i;
+  return TIME_POSTS[i];
+}
+
+// Наполнить карточку-«твит» данными поста.
+function renderTimePost(post) {
+  tmCurrent = post;
+  const avatar = $("tweet-avatar");
+  if (avatar) avatar.innerHTML = catSVG("happy", 44, { variant: 0 }); // маскот-аватар
+  $("tweet-author").textContent = post.author;
+  $("tweet-handle").textContent = post.handle;
+  $("tweet-year").textContent = post.year;
+  $("tweet-text").textContent = post.text;
+
+  // Ссылка «Узнать больше» — только если есть связанная карточка.
+  const more = $("tweet-more");
+  const hasCard = post.cardId != null && CARDS.some((c) => c.id === post.cardId);
+  if (more) more.classList.toggle("hidden", !hasCard);
+}
+
+// Открыть «машину времени»: короткая «фокус»-анимация маскота + модалка.
+function openTimeMachine() {
+  const post = pickTimePost();
+  if (!post) return;
+
+  // Лёгкое масштабирование маскота как отклик на клик (если не «меньше движения»).
+  const mascot = $("hero-mascot");
+  if (mascot && !reducedMotion()) {
+    mascot.classList.remove("tm-zoom");
+    void mascot.offsetWidth;      // сброс анимации для повторного запуска
+    mascot.classList.add("tm-zoom");
+  }
+  Sound.depart && Sound.depart(); // тот же «свуш отправления», что и у кнопки
+
+  renderTimePost(post);
+  openModal("timemachine-modal"); // show + блокировка скролла фона
+}
+
+// Перевыбор даты в уже открытой модалке («Ещё дата»).
+function rerollTimeMachine() {
+  const post = pickTimePost();
+  if (!post) return;
+  // Мягко «переролльнуть»: короткий fade карточки, затем новый текст.
+  const card = $("tweet-card");
+  if (card && !reducedMotion()) {
+    card.classList.remove("tm-reroll");
+    void card.offsetWidth;
+    card.classList.add("tm-reroll");
+  }
+  renderTimePost(post);
+}
+
+function closeTimeMachine() {
+  closeModal("timemachine-modal");
+}
+
+// «Узнать больше об этой дате» — перейти на карточку в режиме обучения.
+function goToCardFromTime(event) {
+  if (event) event.preventDefault();
+  const post = tmCurrent;
+  closeTimeMachine();
+  if (post && post.cardId != null) openLearnAt(post.cardId);
+}
+
 // =================== ИСТОРИЧЕСКИЕ ЭПОХИ (группировка списков дат) ===================
 // Список из 101 даты слишком длинный — группируем его по эпохам в сворачиваемые
 // секции. Граница эпохи — по году НАЧАЛА события (верхняя граница `to` не включается).
